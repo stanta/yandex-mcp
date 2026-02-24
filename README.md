@@ -1,220 +1,468 @@
 # Yandex MCP Server
 
+[🇷🇺 Русская версия](README.ru.md)
+
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io/)
 
-MCP (Model Context Protocol) сервер для управления рекламными кампаниями в **Yandex Direct** и аналитикой в **Yandex Metrika** через Claude, Cursor и другие MCP-совместимые клиенты.
+MCP (Model Context Protocol) server for **Yandex Direct** and **Yandex Metrika** APIs. Provides **120 tools** for managing advertising campaigns, analytics, and reporting through any MCP-compatible client.
 
-> Управляй рекламой и аналитикой Яндекса голосом через AI
+> Manage Yandex advertising and analytics through AI
 
-## Возможности
+## Features
 
-### Yandex Direct API v5
-- **Кампании**: получение, создание, обновление, приостановка, возобновление, архивирование
-- **Группы объявлений**: получение, создание, обновление
-- **Объявления**: получение, создание, модерация, управление состоянием
-- **Ключевые слова**: получение, добавление, удаление, управление ставками
-- **Статистика**: детальные отчёты по кампаниям и группам
+### Yandex Direct API v5 (77 tools)
+- **Campaigns** — create, update, pause, resume, archive, delete
+- **Ad Groups** — create, update with targeting settings
+- **Ads** — text, image, dynamic, shopping ads with moderation
+- **Keywords** — manage keywords and bids
+- **Statistics** — detailed performance reports
+- **Bid Modifiers** — mobile, desktop, demographics, regional adjustments
+- **Retargeting** — retargeting lists and audience targets
+- **Smart Ad Targets** — feed-based targeting filters
+- **Sitelinks, VCards, Callouts** — ad extensions
+- **Feeds** — product feed management
+- **Videos & Creatives** — video ad creation
+- **Dictionaries** — regions, interests, categories
+- **Negative Keywords** — shared negative keyword sets
 
-### Yandex Metrika API
-- **Счётчики**: получение списка, создание, удаление
-- **Цели**: получение, создание
-- **Отчёты**: статистика по метрикам с группировкой по времени
+### Yandex Metrika API (43 tools)
+- **Counters** — create, configure, delete tracking counters
+- **Goals** — conversion goal management
+- **Reports** — analytics with custom metrics, time series, comparisons, drill-down
+- **Segments** — audience segmentation
+- **Filters** — traffic filtering rules
+- **Grants** — access permission management
+- **Offline Data** — upload conversions, calls, expenses, user parameters
+- **Labels & Annotations** — organize counters and mark chart events
+- **Delegates** — account delegation
 
-## Быстрый старт
+## Quick Start
 
-### 1. Установка
+### 1. Install
 
 ```bash
-# С помощью pip
-pip install yandex-mcp
-
-# Или с помощью uv (рекомендуется)
-uv pip install yandex-mcp
-
-# Или из исходников
 git clone https://github.com/SvechaPVL/yandex-mcp.git
 cd yandex-mcp
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -e .
 ```
 
-### 2. Получение токена
+### 2. Set up your Yandex API token
 
-1. Зарегистрируйте приложение на [OAuth Yandex](https://oauth.yandex.ru/)
-2. Добавьте права: `direct:api`, `metrika:read`, `metrika:write`
-3. Получите OAuth токен
+Create a `.env` file:
 
-### 3. Настройка Claude Code
+```env
+YANDEX_TOKEN=your_oauth_token_here
+```
 
-Добавьте в `~/.claude.json` (или через `claude mcp add`):
+Get a token from [Yandex OAuth](https://oauth.yandex.ru/) with permissions for Direct and Metrika APIs (`direct:api`, `metrika:read`, `metrika:write`).
+
+### 3. Configure your MCP client
+
+Add to your MCP client settings:
 
 ```json
 {
   "mcpServers": {
     "yandex": {
-      "command": "yandex-mcp",
+      "command": "python",
+      "args": ["-m", "yandex_mcp"],
+      "cwd": "/path/to/yandex-mcp",
       "env": {
-        "YANDEX_TOKEN": "your_oauth_token"
+        "YANDEX_TOKEN": "your_token"
       }
     }
   }
 }
 ```
 
-### 4. Готово!
+### 4. Done!
 
 ```
-> Покажи все мои кампании в Директе
-> Приостанови кампанию 12345
-> Какая статистика по сайту за неделю?
+> Show all my campaigns in Direct
+> Pause campaign 12345
+> What are the site stats for the last week?
 ```
 
-## Переменные окружения
+## Environment Variables
 
-```bash
-# Единый токен (рекомендуется)
-YANDEX_TOKEN=your_oauth_token
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `YANDEX_TOKEN` | Yes | Yandex OAuth token (used for both Direct and Metrika) |
+| `YANDEX_DIRECT_TOKEN` | No | Separate token for Direct API |
+| `YANDEX_METRIKA_TOKEN` | No | Separate token for Metrika API |
+| `YANDEX_CLIENT_LOGIN` | No | Client login for agency accounts |
+| `YANDEX_USE_SANDBOX` | No | Set to `true` for sandbox API |
 
-# Или раздельные токены
-YANDEX_DIRECT_TOKEN=your_direct_token
-YANDEX_METRIKA_TOKEN=your_metrika_token
+## Tools (120)
 
-# Для агентских аккаунтов
-YANDEX_CLIENT_LOGIN=client_login
+### Yandex Direct (77 tools)
 
-# Песочница для тестов
-YANDEX_USE_SANDBOX=true
+#### Campaigns (8)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_campaigns` | Get campaigns with status, strategy, and budget info |
+| `direct_create_campaign` | Create a new campaign (search, network, or both) |
+| `direct_update_campaign` | Update campaign settings (strategy, budget, schedule, regions) |
+| `direct_suspend_campaigns` | Pause campaigns |
+| `direct_resume_campaigns` | Resume paused campaigns |
+| `direct_archive_campaigns` | Archive campaigns |
+| `direct_unarchive_campaigns` | Restore archived campaigns |
+| `direct_delete_campaigns` | Delete campaigns permanently |
+
+#### Ad Groups (3)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_adgroups` | Get ad groups with targeting settings |
+| `direct_create_adgroup` | Create a new ad group in a campaign |
+| `direct_update_adgroup` | Update ad group settings and targeting |
+
+#### Ads (12)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_ads` | Get ads with content and moderation status |
+| `direct_create_text_ad` | Create a text ad with title, text, and URL |
+| `direct_create_image_ad` | Create an image ad (banner) |
+| `direct_create_dynamic_ad` | Create a dynamic text ad from feed data |
+| `direct_create_shopping_ad` | Create a shopping ad (unified campaign format) |
+| `direct_update_ad` | Update ad content (triggers re-moderation) |
+| `direct_moderate_ads` | Submit ads for moderation |
+| `direct_suspend_ads` | Pause ads |
+| `direct_resume_ads` | Resume paused ads |
+| `direct_archive_ads` | Archive ads |
+| `direct_unarchive_ads` | Restore archived ads |
+| `direct_delete_ads` | Delete ads permanently |
+
+#### Keywords (6)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_keywords` | Get keywords with bids and status |
+| `direct_add_keywords` | Add keywords to an ad group |
+| `direct_set_keyword_bids` | Set search and network bids |
+| `direct_suspend_keywords` | Pause keywords |
+| `direct_resume_keywords` | Resume paused keywords |
+| `direct_delete_keywords` | Delete keywords permanently |
+
+#### Statistics (1)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_statistics` | Get performance reports (impressions, clicks, cost, CTR) |
+
+#### Bid Modifiers (5)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_bid_modifiers` | Get bid modifiers (mobile, desktop, demographics, regional) |
+| `direct_add_bid_modifier` | Add a bid modifier to campaign or ad group |
+| `direct_set_bid_modifier` | Set bid modifier value (0-1300%) |
+| `direct_delete_bid_modifiers` | Delete bid modifiers |
+| `direct_toggle_bid_modifiers` | Enable or disable bid modifiers |
+
+#### Retargeting & Audience Targets (9)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_retargeting_lists` | Get retargeting lists based on Metrika goals |
+| `direct_add_retargeting_list` | Create a retargeting list with goal rules |
+| `direct_update_retargeting_list` | Update retargeting list rules |
+| `direct_delete_retargeting_lists` | Delete retargeting lists |
+| `direct_get_audience_targets` | Get audience targets linking lists to ad groups |
+| `direct_add_audience_target` | Add an audience target to an ad group |
+| `direct_suspend_audience_targets` | Pause audience targets |
+| `direct_resume_audience_targets` | Resume audience targets |
+| `direct_delete_audience_targets` | Delete audience targets |
+
+#### Smart Ad Targets (5)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_smart_ad_targets` | Get smart ad target filters and conditions |
+| `direct_add_smart_ad_target` | Add a targeting filter to a smart ad group |
+| `direct_suspend_smart_ad_targets` | Pause smart ad targets |
+| `direct_resume_smart_ad_targets` | Resume smart ad targets |
+| `direct_delete_smart_ad_targets` | Delete smart ad targets |
+
+#### Sitelinks (3)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_sitelinks` | Get sitelink sets |
+| `direct_add_sitelinks` | Create a sitelink set (up to 8 links) |
+| `direct_delete_sitelinks` | Delete sitelink sets |
+
+#### VCards (3)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_vcards` | Get business card info (address, phone, hours) |
+| `direct_add_vcard` | Create a business card for ads |
+| `direct_delete_vcards` | Delete business cards |
+
+#### Negative Keyword Sets (4)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_negative_keyword_shared_sets` | Get shared negative keyword sets |
+| `direct_add_negative_keyword_shared_set` | Create a shared negative keyword set |
+| `direct_update_negative_keyword_shared_set` | Update a negative keyword set |
+| `direct_delete_negative_keyword_shared_sets` | Delete negative keyword sets |
+
+#### Ad Extensions (3)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_adextensions` | Get ad extensions (callouts, etc.) |
+| `direct_add_callouts` | Add callout extensions |
+| `direct_link_callouts_to_ad` | Link callouts to an ad |
+
+#### Videos & Creatives (4)
+
+| Tool | Description |
+|------|-------------|
+| `direct_upload_video` | Upload a video for ad extensions |
+| `direct_get_advideos` | Get uploaded ad videos |
+| `direct_create_video_creative` | Create a video creative from uploaded video |
+| `direct_get_creatives` | Get video creatives |
+
+#### Feeds (4)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_feeds` | Get product feeds |
+| `direct_add_feed` | Add a product feed (URL or file) |
+| `direct_update_feed` | Update feed settings |
+| `direct_delete_feeds` | Delete feeds |
+
+#### Dictionaries & Regions (3)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_dictionaries` | Get Direct dictionaries (ad categories, interests) |
+| `direct_get_regions` | Get geographic region tree |
+| `direct_get_interests` | Get interest categories for targeting |
+
+#### Client & Changes (4)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_client_info` | Get account info and settings |
+| `direct_check_campaign_changes` | Check for changes in specific campaigns |
+| `direct_check_all_changes` | Check for any changes in the account |
+| `direct_get_recent_changes_timestamp` | Get timestamp of most recent changes |
+
+### Yandex Metrika (43 tools)
+
+#### Counters (5)
+
+| Tool | Description |
+|------|-------------|
+| `metrika_get_counters` | List all Metrika counters |
+| `metrika_get_counter` | Get detailed counter info (code status, webvisor, goals) |
+| `metrika_create_counter` | Create a new counter with tracking code |
+| `metrika_update_counter` | Update counter name, site, or favorite status |
+| `metrika_delete_counter` | Delete a counter and all its data |
+
+#### Goals (4)
+
+| Tool | Description |
+|------|-------------|
+| `metrika_get_goals` | Get conversion goals for a counter |
+| `metrika_create_goal` | Create a goal (URL, event, composite, etc.) |
+| `metrika_update_goal` | Update goal conditions |
+| `metrika_delete_goal` | Delete a goal |
+
+#### Reports (4)
+
+| Tool | Description |
+|------|-------------|
+| `metrika_get_report` | Get analytics report with custom metrics and dimensions |
+| `metrika_get_report_by_time` | Get time-series report (daily, weekly, monthly) |
+| `metrika_get_comparison_report` | Compare two date ranges |
+| `metrika_get_drilldown_report` | Get hierarchical drill-down report |
+
+#### Segments (4)
+
+| Tool | Description |
+|------|-------------|
+| `metrika_get_segments` | Get audience segments |
+| `metrika_create_segment` | Create a segment with filter expression |
+| `metrika_update_segment` | Update segment definition |
+| `metrika_delete_segment` | Delete a segment |
+
+#### Filters (4)
+
+| Tool | Description |
+|------|-------------|
+| `metrika_get_filters` | Get data filters for a counter |
+| `metrika_create_filter` | Create a filter (include/exclude traffic) |
+| `metrika_update_filter` | Update filter conditions |
+| `metrika_delete_filter` | Delete a filter |
+
+#### Grants (4)
+
+| Tool | Description |
+|------|-------------|
+| `metrika_get_grants` | Get access permissions for a counter |
+| `metrika_add_grant` | Grant access to another user |
+| `metrika_update_grant` | Update grant permissions |
+| `metrika_delete_grant` | Revoke access |
+
+#### Offline Data (5)
+
+| Tool | Description |
+|------|-------------|
+| `metrika_upload_offline_conversions` | Upload offline conversion data |
+| `metrika_get_offline_conversions_status` | Check upload processing status |
+| `metrika_upload_calls` | Upload call tracking data |
+| `metrika_upload_expenses` | Upload advertising expense data |
+| `metrika_upload_user_parameters` | Upload custom user parameters |
+
+#### Labels (6)
+
+| Tool | Description |
+|------|-------------|
+| `metrika_get_labels` | Get labels for organizing counters |
+| `metrika_create_label` | Create a label |
+| `metrika_update_label` | Rename a label |
+| `metrika_delete_label` | Delete a label |
+| `metrika_link_counter_to_label` | Link a counter to a label |
+| `metrika_unlink_counter_from_label` | Unlink a counter from a label |
+
+#### Annotations (4)
+
+| Tool | Description |
+|------|-------------|
+| `metrika_get_annotations` | Get chart annotations for a counter |
+| `metrika_create_annotation` | Create an annotation (mark events on charts) |
+| `metrika_update_annotation` | Update annotation text |
+| `metrika_delete_annotation` | Delete an annotation |
+
+#### Delegates (3)
+
+| Tool | Description |
+|------|-------------|
+| `metrika_get_delegates` | Get list of account delegates |
+| `metrika_add_delegate` | Add a delegate with counter access |
+| `metrika_delete_delegate` | Remove a delegate |
+
+## Usage Examples
+
+### Campaign management
+```
+Show all active campaigns
+Pause campaign "Summer sale"
+Set weekly budget of campaign 123 to 50000 rubles
 ```
 
-## Доступные инструменты (33 шт)
-
-### Yandex Direct
-
-| Инструмент | Описание |
-|------------|----------|
-| `direct_get_campaigns` | Получить список кампаний |
-| `direct_update_campaign` | Обновить настройки кампании |
-| `direct_suspend_campaigns` | Приостановить кампании |
-| `direct_resume_campaigns` | Возобновить кампании |
-| `direct_archive_campaigns` | Архивировать кампании |
-| `direct_unarchive_campaigns` | Разархивировать кампании |
-| `direct_delete_campaigns` | Удалить кампании |
-| `direct_get_adgroups` | Получить группы объявлений |
-| `direct_create_adgroup` | Создать группу объявлений |
-| `direct_update_adgroup` | Обновить группу объявлений |
-| `direct_get_ads` | Получить объявления |
-| `direct_create_text_ad` | Создать текстовое объявление |
-| `direct_update_ad` | Обновить объявление |
-| `direct_moderate_ads` | Отправить на модерацию |
-| `direct_suspend_ads` | Приостановить объявления |
-| `direct_resume_ads` | Возобновить объявления |
-| `direct_archive_ads` | Архивировать объявления |
-| `direct_unarchive_ads` | Разархивировать объявления |
-| `direct_delete_ads` | Удалить объявления |
-| `direct_get_keywords` | Получить ключевые слова |
-| `direct_add_keywords` | Добавить ключевые слова |
-| `direct_delete_keywords` | Удалить ключевые слова |
-| `direct_set_keyword_bids` | Установить ставки |
-| `direct_get_statistics` | Получить статистику |
-
-### Yandex Metrika
-
-| Инструмент | Описание |
-|------------|----------|
-| `metrika_get_counters` | Получить список счётчиков |
-| `metrika_get_counter` | Детали счётчика |
-| `metrika_create_counter` | Создать счётчик |
-| `metrika_delete_counter` | Удалить счётчик |
-| `metrika_get_goals` | Получить цели |
-| `metrika_create_goal` | Создать цель |
-| `metrika_get_report` | Получить отчёт |
-| `metrika_get_report_by_time` | Отчёт по времени |
-
-## Примеры использования
-
-### Управление кампаниями
+### Keywords
 ```
-Покажи все активные кампании
-Приостанови кампанию "Летняя акция"
-Увеличь дневной бюджет кампании 123 до 5000 рублей
+Show keywords in ad group 456
+Add keywords "buy iphone" and "iphone price" to group 456
+Set bid 50 rubles on keyword 789
 ```
 
-### Работа с ключевыми словами
+### Analytics
 ```
-Покажи ключевые слова в группе 456
-Добавь ключи "купить айфон" и "айфон цена" в группу 456
-Установи ставку 50 рублей на ключ 789
-```
-
-### Аналитика
-```
-Покажи статистику сайта за последнюю неделю
-Сколько было конверсий по цели "Заявка" за месяц?
-Покажи источники трафика для счётчика 12345
+Show site stats for the last week
+How many conversions on goal "Lead" for the last month?
+Show traffic sources for counter 97538360
 ```
 
-### Создание объявлений
+### Ad creation
 ```
-Создай текстовое объявление в группе 456:
-- Заголовок: Купить iPhone 15
-- Текст: Лучшие цены! Доставка бесплатно
-- Ссылка: https://example.com/iphone
+Create a text ad in group 456:
+- Title: Buy iPhone 15
+- Text: Best prices! Free delivery
+- URL: https://example.com/iphone
 ```
 
-## Альтернативные способы запуска
+## Alternative Run Methods
 
-### Напрямую через Python
+### Direct execution
 ```bash
 python -m yandex_mcp
+# or
+python main.py
 ```
 
-### Проверка через MCP Inspector
+### MCP Inspector
 ```bash
-# Если установлен как пакет
-npx @modelcontextprotocol/inspector yandex-mcp
-
-# Или напрямую из папки проекта
-npx @modelcontextprotocol/inspector python yandex_mcp.py
+npx @modelcontextprotocol/inspector python -m yandex_mcp
 ```
 
 ### Cursor IDE
-Добавьте в настройки Cursor аналогично Claude Code.
+Add to Cursor MCP settings in the same format as above.
 
-## Безопасность
+## Project Structure
 
-- Храните токены в переменных окружения, не в коде
-- Используйте минимально необходимые права доступа
-- Для тестирования используйте песочницу (`YANDEX_USE_SANDBOX=true`)
-- Не коммитьте `.env` файлы
+```
+yandex_mcp/
+├── __init__.py          # MCP server init and tool registration
+├── client.py            # Async HTTP client for Direct & Metrika APIs
+├── config.py            # Configuration and environment variables
+├── utils.py             # Error handling utilities
+├── models/              # Pydantic input models
+│   ├── common.py
+│   ├── direct.py
+│   ├── direct_extended.py
+│   ├── metrika.py
+│   └── metrika_extended.py
+├── formatters/          # Markdown output formatters
+│   ├── direct.py
+│   └── metrika.py
+└── tools/               # MCP tool definitions
+    ├── direct/          # 77 Yandex Direct tools
+    │   ├── _helpers.py  # Shared manage-operation factory
+    │   ├── campaigns.py
+    │   ├── adgroups.py
+    │   ├── ads.py
+    │   ├── keywords.py
+    │   ├── stats.py
+    │   └── ...
+    └── metrika/         # 43 Yandex Metrika tools
+        ├── counters.py
+        ├── goals.py
+        ├── reports.py
+        └── ...
+```
 
-## Разработка
+## Development
 
 ```bash
-# Клонировать репозиторий
-git clone https://github.com/SvechaPVL/yandex-mcp.git
-cd yandex-mcp
-
-# Установить зависимости для разработки
+# Install dev dependencies
 pip install -e ".[dev]"
 
-# Запустить линтер
+# Lint
 ruff check .
 
-# Запустить тесты
+# Type check
+mypy yandex_mcp
+
+# Test
 pytest
 ```
 
-## Лицензия
+## Security
 
-MIT License - используйте свободно.
+- Store tokens in environment variables, not in code
+- Use minimum required permissions
+- Use sandbox for testing (`YANDEX_USE_SANDBOX=true`)
+- Never commit `.env` files
 
-## Ссылки
+## Links
 
-- [Документация Yandex Direct API](https://yandex.ru/dev/direct/doc/dg/concepts/about.html)
-- [Документация Yandex Metrika API](https://yandex.ru/dev/metrika/doc/api2/concept/about.html)
+- [Yandex Direct API docs](https://yandex.ru/dev/direct/doc/dg/concepts/about.html)
+- [Yandex Metrika API docs](https://yandex.ru/dev/metrika/doc/api2/concept/about.html)
 - [Model Context Protocol](https://modelcontextprotocol.io/)
 
----
+## License
 
-Сделано с ❤️ для автоматизации рекламы
+MIT
