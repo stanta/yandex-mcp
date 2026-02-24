@@ -33,6 +33,10 @@ class YandexAPIClient:
         """Get token for Metrika API."""
         return self.metrika_token or self.unified_token
 
+    def _get_wordstat_token(self) -> str:
+        """Get token for Wordstat API."""
+        return self.direct_token or self.unified_token
+
     def _get_direct_url(self, use_v501: bool = False) -> str:
         """Get Direct API URL based on configuration."""
         if self.use_sandbox:
@@ -114,6 +118,31 @@ class YandexAPIClient:
             if response.status_code == 204:
                 return {"success": True}
 
+            return response.json()
+
+    async def wordstat_request(
+        self,
+        endpoint: str,
+        data: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """Make a request to Yandex Wordstat API."""
+        token = self._get_wordstat_token()
+        if not token:
+            raise ValueError(
+                "Yandex Wordstat API token not configured. "
+                "Set YANDEX_DIRECT_TOKEN or YANDEX_TOKEN environment variable."
+            )
+
+        from .config import YANDEX_WORDSTAT_API_URL
+        url = f"{YANDEX_WORDSTAT_API_URL}{endpoint}"
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json;charset=utf-8",
+        }
+
+        async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as client:
+            response = await client.post(url, json=data or {}, headers=headers)
+            response.raise_for_status()
             return response.json()
 
 

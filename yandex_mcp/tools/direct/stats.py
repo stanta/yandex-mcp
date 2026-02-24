@@ -1,5 +1,6 @@
 """Yandex Direct statistics tools."""
 
+import asyncio
 import json
 import httpx
 from mcp.server.fastmcp import FastMCP
@@ -51,7 +52,7 @@ def register(mcp: FastMCP) -> None:
                     "DateTo": params.date_to
                 },
                 "FieldNames": params.field_names,
-                "ReportName": f"Report_{params.date_from}_{params.date_to}",
+                "ReportName": f"Report_{params.report_type}_{params.date_from}_{params.date_to}_{hash(tuple(params.field_names))}",
                 "ReportType": params.report_type,
                 "DateRangeType": "CUSTOM_DATE",
                 "Format": "TSV",
@@ -86,47 +87,56 @@ def register(mcp: FastMCP) -> None:
             if api_client.client_login:
                 headers["Client-Login"] = api_client.client_login
 
+            max_attempts = 10
+            response = None
             async with httpx.AsyncClient(timeout=REPORT_TIMEOUT) as client:
-                response = await client.post(url, json={"params": report_def}, headers=headers)
+                for attempt in range(max_attempts):
+                    response = await client.post(url, json={"params": report_def}, headers=headers)
 
-                if response.status_code == 200:
-                    # Parse TSV response
-                    lines = response.text.strip().split("\n")
-                    if len(lines) < 2:
-                        return "No data found for the specified period."
+                    if response.status_code == 200:
+                        break
 
-                    header = lines[0].split("\t")
-                    data_rows = [line.split("\t") for line in lines[1:] if line.strip()]
+                    if response.status_code in (201, 202):
+                        wait = int(response.headers.get("retryIn", 5))
+                        if attempt < max_attempts - 1:
+                            await asyncio.sleep(wait)
+                            continue
+                        return "Report is still being generated. Please try again later."
 
-                    if params.response_format == ResponseFormat.JSON:
-                        result = []
-                        for row in data_rows:
-                            result.append(dict(zip(header, row)))
-                        return json.dumps({"data": result, "total": len(result)}, indent=2, ensure_ascii=False)
-
-                    # Format as markdown
-                    md_lines = ["# Direct Statistics Report\n"]
-                    md_lines.append(f"**Period**: {params.date_from} - {params.date_to}")
-                    md_lines.append(f"**Report type**: {params.report_type}\n")
-
-                    md_lines.append("| " + " | ".join(header) + " |")
-                    md_lines.append("| " + " | ".join(["---"] * len(header)) + " |")
-
-                    for row in data_rows[:100]:  # Limit to 100 rows
-                        md_lines.append("| " + " | ".join(row) + " |")
-
-                    if len(data_rows) > 100:
-                        md_lines.append(f"\n*...and {len(data_rows) - 100} more rows*")
-
-                    return "\n".join(md_lines)
-
-                elif response.status_code == 201 or response.status_code == 202:
-                    return "Report is being generated. Please try again in a few seconds."
-
-                else:
                     response.raise_for_status()
 
-            return "Unexpected response from API."
+            if response is None or response.status_code != 200:
+                return "Unexpected response from Reports API."
+
+            # Parse TSV response
+            lines = response.text.strip().split("\n")
+            if len(lines) < 2:
+                return "No data found for the specified period."
+
+            header = lines[0].split("\t")
+            data_rows = [line.split("\t") for line in lines[1:] if line.strip()]
+
+            if params.response_format == ResponseFormat.JSON:
+                result = []
+                for row in data_rows:
+                    result.append(dict(zip(header, row)))
+                return json.dumps({"data": result, "total": len(result)}, indent=2, ensure_ascii=False)
+
+            # Format as markdown
+            md_lines = ["# Direct Statistics Report\n"]
+            md_lines.append(f"**Period**: {params.date_from} - {params.date_to}")
+            md_lines.append(f"**Report type**: {params.report_type}\n")
+
+            md_lines.append("| " + " | ".join(header) + " |")
+            md_lines.append("| " + " | ".join(["---"] * len(header)) + " |")
+
+            for row in data_rows[:100]:  # Limit to 100 rows
+                md_lines.append("| " + " | ".join(row) + " |")
+
+            if len(data_rows) > 100:
+                md_lines.append(f"\n*...and {len(data_rows) - 100} more rows*")
+
+            return "\n".join(md_lines)
 
         except Exception as e:
             return handle_api_error(e)

@@ -1,5 +1,6 @@
 """Extended Pydantic models for Yandex Direct API - Sitelinks, VCards, BidModifiers, etc."""
 
+from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -403,3 +404,46 @@ class GetClientInfoInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+# =============================================================================
+# AdImages Models
+# =============================================================================
+
+class ImageType(str, Enum):
+    """Ad image type."""
+    REGULAR = "REGULAR"
+    WIDE = "WIDE"
+
+
+class ImageAssociated(str, Enum):
+    """Image association status."""
+    YES = "YES"
+    NO = "NO"
+
+
+class UploadImageInput(BaseModel):
+    """Input for uploading an ad image."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    image_data: str = Field(..., description="Base64-encoded image data")
+    name: str = Field(..., max_length=255, description="Image name")
+    image_type: ImageType = Field(default=ImageType.REGULAR, description="Image type: REGULAR or WIDE")
+
+
+class GetImagesInput(BaseModel):
+    """Input for getting ad images."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    ad_image_hashes: Optional[List[str]] = Field(default=None, description="Filter by image hashes")
+    associated: Optional[ImageAssociated] = Field(default=None, description="Filter by association: YES or NO")
+    limit: int = Field(default=100, ge=1, le=10000, description="Maximum images to return")
+    offset: int = Field(default=0, ge=0, description="Offset for pagination")
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN, description="Output format")
+
+
+class DeleteImagesInput(BaseModel):
+    """Input for deleting ad images."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    ad_image_hashes: List[str] = Field(..., min_length=1, description="Image hashes to delete")

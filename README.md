@@ -6,26 +6,34 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io/)
 
-MCP (Model Context Protocol) server for **Yandex Direct** and **Yandex Metrika** APIs. Provides **120 tools** for managing advertising campaigns, analytics, and reporting through any MCP-compatible client.
+MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, and **Yandex Wordstat** APIs. Provides **128 tools** for managing advertising campaigns, analytics, keyword research, and reporting through any MCP-compatible client.
 
 > Manage Yandex advertising and analytics through AI
 
 ## Features
 
-### Yandex Direct API v5 (77 tools)
+### Yandex Direct API v5 (80 tools)
 - **Campaigns** — create, update, pause, resume, archive, delete
 - **Ad Groups** — create, update with targeting settings
 - **Ads** — text, image, dynamic, shopping ads with moderation
 - **Keywords** — manage keywords and bids
-- **Statistics** — detailed performance reports
+- **Statistics** — detailed performance reports with async retry
 - **Bid Modifiers** — mobile, desktop, demographics, regional adjustments
 - **Retargeting** — retargeting lists and audience targets
 - **Smart Ad Targets** — feed-based targeting filters
 - **Sitelinks, VCards, Callouts** — ad extensions
+- **Images** — upload, manage, and delete ad images
 - **Feeds** — product feed management
 - **Videos & Creatives** — video ad creation
 - **Dictionaries** — regions, interests, categories
 - **Negative Keywords** — shared negative keyword sets
+
+### Yandex Wordstat API (5 tools)
+- **Top Requests** — popular search queries and associations
+- **Dynamics** — query frequency trends over time
+- **Regions** — regional distribution of search queries
+- **Regions Tree** — hierarchical region structure
+- **User Info** — API quota and usage limits
 
 ### Yandex Metrika API (43 tools)
 - **Counters** — create, configure, delete tracking counters
@@ -97,9 +105,9 @@ Add to your MCP client settings:
 | `YANDEX_CLIENT_LOGIN` | No | Client login for agency accounts |
 | `YANDEX_USE_SANDBOX` | No | Set to `true` for sandbox API |
 
-## Tools (120)
+## Tools (128)
 
-### Yandex Direct (77 tools)
+### Yandex Direct (80 tools)
 
 #### Campaigns (8)
 
@@ -241,6 +249,14 @@ Add to your MCP client settings:
 | `direct_update_feed` | Update feed settings |
 | `direct_delete_feeds` | Delete feeds |
 
+#### Images (3)
+
+| Tool | Description |
+|------|-------------|
+| `direct_upload_image` | Upload a base64-encoded image (JPEG, GIF, PNG) |
+| `direct_get_images` | Get image metadata, hashes, and association status |
+| `direct_delete_images` | Delete unassociated images by hash |
+
 #### Dictionaries & Regions (3)
 
 | Tool | Description |
@@ -353,6 +369,16 @@ Add to your MCP client settings:
 | `metrika_add_delegate` | Add a delegate with counter access |
 | `metrika_delete_delegate` | Remove a delegate |
 
+### Yandex Wordstat (5 tools)
+
+| Tool | Description |
+|------|-------------|
+| `wordstat_top_requests` | Get popular search queries and associations for phrases |
+| `wordstat_dynamics` | Get query frequency dynamics over time (daily/weekly/monthly) |
+| `wordstat_regions` | Get regional distribution of search queries |
+| `wordstat_regions_tree` | Get full hierarchical regions tree with IDs |
+| `wordstat_user_info` | Get API quota and usage limits |
+
 ## Usage Examples
 
 ### Campaign management
@@ -384,6 +410,13 @@ Create a text ad in group 456:
 - URL: https://example.com/iphone
 ```
 
+### Keyword research
+```
+Show top requests for "buy car from china"
+Query dynamics for "electric car" over the last year
+Regional distribution for "auto from japan"
+```
+
 ## Alternative Run Methods
 
 ### Direct execution
@@ -406,7 +439,7 @@ Add to Cursor MCP settings in the same format as above.
 ```
 yandex_mcp/
 ├── __init__.py          # MCP server init and tool registration
-├── client.py            # Async HTTP client for Direct & Metrika APIs
+├── client.py            # Async HTTP client for Direct, Metrika & Wordstat APIs
 ├── config.py            # Configuration and environment variables
 ├── utils.py             # Error handling utilities
 ├── models/              # Pydantic input models
@@ -414,24 +447,28 @@ yandex_mcp/
 │   ├── direct.py
 │   ├── direct_extended.py
 │   ├── metrika.py
-│   └── metrika_extended.py
+│   ├── metrika_extended.py
+│   └── wordstat.py
 ├── formatters/          # Markdown output formatters
 │   ├── direct.py
-│   └── metrika.py
+│   ├── metrika.py
+│   └── wordstat.py
 └── tools/               # MCP tool definitions
-    ├── direct/          # 77 Yandex Direct tools
+    ├── direct/          # 80 Yandex Direct tools
     │   ├── _helpers.py  # Shared manage-operation factory
     │   ├── campaigns.py
     │   ├── adgroups.py
     │   ├── ads.py
     │   ├── keywords.py
     │   ├── stats.py
+    │   ├── images.py
     │   └── ...
-    └── metrika/         # 43 Yandex Metrika tools
-        ├── counters.py
-        ├── goals.py
-        ├── reports.py
-        └── ...
+    ├── metrika/         # 43 Yandex Metrika tools
+    │   ├── counters.py
+    │   ├── goals.py
+    │   ├── reports.py
+    │   └── ...
+    └── wordstat.py      # 5 Yandex Wordstat tools
 ```
 
 ## Development

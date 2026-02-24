@@ -22,6 +22,7 @@ def register_direct_tools(mcp: FastMCP) -> None:
         advideos,
         creatives,
         feeds,
+        images,
         smartadtargets,
     )
 
@@ -44,4 +45,5 @@ def register_direct_tools(mcp: FastMCP) -> None:
     advideos.register(mcp)
     creatives.register(mcp)
     feeds.register(mcp)
+    images.register(mcp)
     smartadtargets.register(mcp)

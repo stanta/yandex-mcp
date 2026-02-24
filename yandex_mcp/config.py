@@ -9,3 +9,5 @@ YANDEX_METRIKA_API_URL = "https://api-metrika.yandex.net"
 # Default timeout for API requests
 DEFAULT_TIMEOUT = 30.0
 REPORT_TIMEOUT = 120.0
+
+YANDEX_WORDSTAT_API_URL = "https://api.wordstat.yandex.net"
