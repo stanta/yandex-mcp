@@ -508,3 +508,80 @@ class DeleteDynamicTextAdTargetsInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     target_ids: List[int] = Field(..., min_length=1, description="Dynamic text ad target IDs to delete")
+
+
+# =============================================================================
+# LeadForms Models
+# =============================================================================
+
+class QuestionType(str, Enum):
+    """Lead form question types."""
+    NAME = "NAME"
+    PHONE = "PHONE"
+    EMAIL = "EMAIL"
+    ADDRESS = "ADDRESS"
+    COMMENT = "COMMENT"
+    CHECKBOX = "CHECKBOX"
+
+
+class LeadFormQuestion(BaseModel):
+    """A single question in the lead form."""
+    type: QuestionType = Field(..., description="Question type: NAME, PHONE, EMAIL, ADDRESS, COMMENT, CHECKBOX")
+    required: bool = Field(default=False, description="Whether this question is required")
+    label: Optional[str] = Field(default=None, max_length=255, description="Custom label for the question")
+
+
+class GetLeadFormsInput(BaseModel):
+    """Input for getting lead forms."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    campaign_ids: Optional[List[int]] = Field(default=None, description="Filter by campaign IDs")
+    adgroup_ids: Optional[List[int]] = Field(default=None, description="Filter by ad group IDs")
+    form_ids: Optional[List[int]] = Field(default=None, description="Filter by form IDs")
+    limit: int = Field(default=100, ge=1, le=10000, description="Maximum forms to return")
+    offset: int = Field(default=0, ge=0, description="Offset for pagination")
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+class AddLeadFormInput(BaseModel):
+    """Input for adding a lead form."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    name: str = Field(..., max_length=255, description="Lead form name")
+    campaign_id: int = Field(..., description="Campaign ID")
+    url: str = Field(..., max_length=1024, description="Landing page URL where form is placed")
+    policy_url: str = Field(..., max_length=1024, description="Privacy policy URL")
+    short_form: bool = Field(default=False, description="Use short form (only name + phone)")
+    questions: Optional[List[LeadFormQuestion]] = Field(
+        default=None,
+        description="Form questions. If not specified, default questions will be used."
+    )
+
+
+class UpdateLeadFormInput(BaseModel):
+    """Input for updating a lead form."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    form_id: int = Field(..., description="Lead form ID to update")
+    name: Optional[str] = Field(default=None, max_length=255, description="New form name")
+    url: Optional[str] = Field(default=None, max_length=1024, description="New landing page URL")
+    policy_url: Optional[str] = Field(default=None, max_length=1024, description="New privacy policy URL")
+    short_form: Optional[bool] = Field(default=None, description="Use short form")
+    questions: Optional[List[LeadFormQuestion]] = Field(default=None, description="New questions")
+
+
+class DeleteLeadFormsInput(BaseModel):
+    """Input for deleting lead forms."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    form_ids: List[int] = Field(..., min_length=1, description="Lead form IDs to delete")
+
+
+class GetLeadFormLeadsInput(BaseModel):
+    """Input for getting leads from lead forms."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    form_ids: Optional[List[int]] = Field(default=None, description="Filter by form IDs")
+    limit: int = Field(default=100, ge=1, le=10000, description="Maximum leads to return")
+    offset: int = Field(default=0, ge=0, description="Offset for pagination")
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)

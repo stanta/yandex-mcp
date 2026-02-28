@@ -113,6 +113,12 @@ EXPECTED_DIRECT_TOOLS = [
     "direct_check_campaign_changes",
     "direct_check_all_changes",
     "direct_get_recent_changes_timestamp",
+    # Lead Forms (5)
+    "direct_get_lead_forms",
+    "direct_add_lead_form",
+    "direct_update_lead_form",
+    "direct_delete_lead_forms",
+    "direct_get_lead_form_leads",
 ]
 
 EXPECTED_METRIKA_TOOLS = [
@@ -417,3 +423,90 @@ class TestBiddingStrategies:
         )
         assert input_data.search_strategy_type == BiddingStrategyType.PAY_FOR_CONVERSION_CRR
         assert input_data.crr_limit == 75.0
+
+
+class TestLeadFormsModels:
+    """Test LeadForms models and enums."""
+
+    def test_question_type_enum(self):
+        """Test that all question types are defined."""
+        from yandex_mcp.models.direct_extended import QuestionType
+        
+        assert QuestionType.NAME.value == "NAME"
+        assert QuestionType.PHONE.value == "PHONE"
+        assert QuestionType.EMAIL.value == "EMAIL"
+        assert QuestionType.ADDRESS.value == "ADDRESS"
+        assert QuestionType.COMMENT.value == "COMMENT"
+        assert QuestionType.CHECKBOX.value == "CHECKBOX"
+
+    def test_lead_form_question_model(self):
+        """Test LeadFormQuestion model."""
+        from yandex_mcp.models.direct_extended import LeadFormQuestion, QuestionType
+        
+        question = LeadFormQuestion(
+            type=QuestionType.PHONE,
+            required=True,
+            label="Your phone number"
+        )
+        assert question.type == QuestionType.PHONE
+        assert question.required is True
+        assert question.label == "Your phone number"
+
+    def test_add_lead_form_input_model(self):
+        """Test AddLeadFormInput model."""
+        from yandex_mcp.models.direct_extended import AddLeadFormInput, LeadFormQuestion, QuestionType
+        
+        questions = [
+            LeadFormQuestion(type=QuestionType.NAME, required=True),
+            LeadFormQuestion(type=QuestionType.PHONE, required=True),
+            LeadFormQuestion(type=QuestionType.EMAIL, required=False),
+        ]
+        
+        input_data = AddLeadFormInput(
+            name="Contact Form",
+            campaign_id=12345678,
+            url="https://example.com/contact",
+            policy_url="https://example.com/privacy",
+            short_form=False,
+            questions=questions
+        )
+        assert input_data.name == "Contact Form"
+        assert input_data.campaign_id == 12345678
+        assert input_data.short_form is False
+        assert len(input_data.questions) == 3
+
+    def test_update_lead_form_input_model(self):
+        """Test UpdateLeadFormInput model."""
+        from yandex_mcp.models.direct_extended import UpdateLeadFormInput
+        
+        input_data = UpdateLeadFormInput(
+            form_id=12345,
+            name="Updated Form Name",
+            url="https://example.com/new-page"
+        )
+        assert input_data.form_id == 12345
+        assert input_data.name == "Updated Form Name"
+        assert input_data.url == "https://example.com/new-page"
+
+    def test_get_lead_forms_input_model(self):
+        """Test GetLeadFormsInput model."""
+        from yandex_mcp.models.direct_extended import GetLeadFormsInput
+        
+        input_data = GetLeadFormsInput(
+            campaign_ids=[12345678, 87654321],
+            form_ids=[111, 222],
+            limit=50,
+            offset=0
+        )
+        assert input_data.campaign_ids == [12345678, 87654321]
+        assert input_data.form_ids == [111, 222]
+        assert input_data.limit == 50
+
+    def test_delete_lead_forms_input_model(self):
+        """Test DeleteLeadFormsInput model."""
+        from yandex_mcp.models.direct_extended import DeleteLeadFormsInput
+        
+        input_data = DeleteLeadFormsInput(
+            form_ids=[111, 222, 333]
+        )
+        assert input_data.form_ids == [111, 222, 333]

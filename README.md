@@ -6,13 +6,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io/)
 
-MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, and **Yandex Wordstat** APIs. Provides **132 tools** for managing advertising campaigns, analytics, keyword research, and reporting through any MCP-compatible client.
+MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, and **Yandex Wordstat** APIs. Provides **137 tools** for managing advertising campaigns, analytics, keyword research, and reporting through any MCP-compatible client.
 
 > Manage Yandex advertising and analytics through AI
 
 ## Features
 
-### Yandex Direct API v5 (90 tools)
+### Yandex Direct API v5 (95 tools)
 - **Campaigns** — create, update, pause, resume, archive, delete
 - **Ad Groups** — create, update, pause, resume, archive, unarchive with targeting settings
 - **Ads** — text, image, dynamic, shopping ads with moderation
@@ -25,6 +25,7 @@ MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, a
 - **Sitelinks, VCards, Callouts** — ad extensions
 - **Images** — upload, manage, and delete ad images
 - **Feeds** — product feed management
+- **Lead Forms** — lead generation form management
 - **Videos & Creatives** — video ad creation
 - **Dictionaries** — regions, interests, categories
 - **Negative Keywords** — shared negative keyword sets
@@ -106,9 +107,9 @@ Add to your MCP client settings:
 | `YANDEX_CLIENT_LOGIN` | No | Client login for agency accounts |
 | `YANDEX_USE_SANDBOX` | No | Set to `true` for sandbox API |
 
-## Tools (138)
+## Tools (143)
 
-### Yandex Direct (90 tools)
+### Yandex Direct (95 tools)
 
 #### Campaigns (8)
 
@@ -299,6 +300,16 @@ Add to your MCP client settings:
 | `direct_check_all_changes` | Check for any changes in the account |
 | `direct_get_recent_changes_timestamp` | Get timestamp of most recent changes |
 
+#### Lead Forms (5)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_lead_forms` | Get lead forms with filtering by campaign/ad group |
+| `direct_add_lead_form` | Create a new lead form with custom questions |
+| `direct_update_lead_form` | Update lead form settings |
+| `direct_delete_lead_forms` | Delete lead forms permanently |
+| `direct_get_lead_form_leads` | Get submissions/leads from lead forms |
+
 ### Yandex Metrika (43 tools)
 
 #### Counters (5)
@@ -479,7 +490,7 @@ yandex_mcp/
 │   ├── metrika.py
 │   └── wordstat.py
 └── tools/               # MCP tool definitions
-    ├── direct/          # 80 Yandex Direct tools
+    ├── direct/          # 95 Yandex Direct tools
     │   ├── _helpers.py  # Shared manage-operation factory
     │   ├── campaigns.py
     │   ├── adgroups.py
@@ -487,6 +498,7 @@ yandex_mcp/
     │   ├── keywords.py
     │   ├── stats.py
     │   ├── images.py
+    │   ├── lead_forms.py
     │   └── ...
     ├── metrika/         # 43 Yandex Metrika tools
     │   ├── counters.py
