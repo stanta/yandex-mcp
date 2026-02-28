@@ -122,6 +122,15 @@ YANDEX_TOKEN=ваш_oauth_токен
 | `direct_unarchive_campaigns` | Разархивировать кампании |
 | `direct_delete_campaigns` | Удалить кампании |
 
+**Поддерживаемые стратегии ставок:**
+- `WB_MAXIMUM_CLICKS` — Максимизация кликов в рамках бюджета
+- `AVERAGE_CPC` — Средняя цена клика
+- `AVERAGE_CPA` — Целевая средняя CPA (требуется goal_id)
+- `AVERAGE_ROI` — Целевой ROI с коэффициентом (требуется goal_id)
+- `WB_MAXIMUM_CONVERSION_RATE` — Максимизация конверсии
+- `PAY_FOR_CONVERSION` — Оплата за конверсию (требуется goal_id)
+- `PAY_FOR_CONVERSION_CRR` — Оплата за конверсию с лимитом CRR (требуется goal_id)
+
 #### Группы объявлений (7)
 
 | Инструмент | Описание |

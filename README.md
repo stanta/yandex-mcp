@@ -122,6 +122,15 @@ Add to your MCP client settings:
 | `direct_unarchive_campaigns` | Restore archived campaigns |
 | `direct_delete_campaigns` | Delete campaigns permanently |
 
+**Supported Bidding Strategies:**
+- `WB_MAXIMUM_CLICKS` — Maximize clicks within budget
+- `AVERAGE_CPC` — Average CPC strategy
+- `AVERAGE_CPA` — Target average CPA (requires goal_id)
+- `AVERAGE_ROI` — Target ROI with ROI coefficient (requires goal_id)
+- `WB_MAXIMUM_CONVERSION_RATE` — Maximize conversion rate
+- `PAY_FOR_CONVERSION` — Pay per conversion (requires goal_id)
+- `PAY_FOR_CONVERSION_CRR` — Pay per conversion with CRR limit (requires goal_id)
+
 #### Ad Groups (7)
 
 | Tool | Description |

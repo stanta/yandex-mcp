@@ -266,3 +266,147 @@ class TestImports:
     def test_import_formatters(self):
         from yandex_mcp.formatters.wordstat import format_wordstat_top_requests_markdown
         assert callable(format_wordstat_top_requests_markdown)
+
+
+class TestBiddingStrategies:
+    """Test bidding strategy models and enums."""
+
+    def test_bidding_strategy_types_enum(self):
+        """Test that all bidding strategy types are defined."""
+        from yandex_mcp.models.direct import BiddingStrategyType
+        
+        # Verify all expected strategies exist
+        assert BiddingStrategyType.WB_MAXIMUM_CLICKS.value == "WB_MAXIMUM_CLICKS"
+        assert BiddingStrategyType.AVERAGE_CPC.value == "AVERAGE_CPC"
+        assert BiddingStrategyType.WB_MAXIMUM_CONVERSION_RATE.value == "WB_MAXIMUM_CONVERSION_RATE"
+        assert BiddingStrategyType.AVERAGE_CPA.value == "AVERAGE_CPA"
+        assert BiddingStrategyType.AVERAGE_ROI.value == "AVERAGE_ROI"
+        assert BiddingStrategyType.PAY_FOR_CONVERSION.value == "PAY_FOR_CONVERSION"
+        assert BiddingStrategyType.PAY_FOR_CONVERSION_CRR.value == "PAY_FOR_CONVERSION_CRR"
+        assert BiddingStrategyType.SERVING_OFF.value == "SERVING_OFF"
+
+    def test_update_campaign_input_with_average_cpa(self):
+        """Test UpdateCampaignInput with AVERAGE_CPA strategy."""
+        from yandex_mcp.models.direct import UpdateCampaignInput, BiddingStrategyType
+        
+        input_data = UpdateCampaignInput(
+            campaign_id=12345678,
+            bidding_strategy_type=BiddingStrategyType.AVERAGE_CPA,
+            average_cpa=500.0,
+            goal_id=9876543,
+            weekly_spend_limit=10000.0
+        )
+        assert input_data.campaign_id == 12345678
+        assert input_data.bidding_strategy_type == BiddingStrategyType.AVERAGE_CPA
+        assert input_data.average_cpa == 500.0
+        assert input_data.goal_id == 9876543
+        assert input_data.weekly_spend_limit == 10000.0
+
+    def test_update_campaign_input_with_average_roi(self):
+        """Test UpdateCampaignInput with AVERAGE_ROI strategy."""
+        from yandex_mcp.models.direct import UpdateCampaignInput, BiddingStrategyType
+        
+        input_data = UpdateCampaignInput(
+            campaign_id=12345678,
+            bidding_strategy_type=BiddingStrategyType.AVERAGE_ROI,
+            roi_coef=1.5,
+            reserve_return=0.8,
+            goal_id=9876543,
+            weekly_spend_limit=5000.0
+        )
+        assert input_data.bidding_strategy_type == BiddingStrategyType.AVERAGE_ROI
+        assert input_data.roi_coef == 1.5
+        assert input_data.reserve_return == 0.8
+        assert input_data.goal_id == 9876543
+
+    def test_update_campaign_input_with_pay_for_conversion(self):
+        """Test UpdateCampaignInput with PAY_FOR_CONVERSION strategy."""
+        from yandex_mcp.models.direct import UpdateCampaignInput, BiddingStrategyType
+        
+        input_data = UpdateCampaignInput(
+            campaign_id=12345678,
+            bidding_strategy_type=BiddingStrategyType.PAY_FOR_CONVERSION,
+            max_conversion_cost=1000.0,
+            goal_id=9876543
+        )
+        assert input_data.bidding_strategy_type == BiddingStrategyType.PAY_FOR_CONVERSION
+        assert input_data.max_conversion_cost == 1000.0
+        assert input_data.goal_id == 9876543
+
+    def test_update_campaign_input_with_pay_for_conversion_crr(self):
+        """Test UpdateCampaignInput with PAY_FOR_CONVERSION_CRR strategy."""
+        from yandex_mcp.models.direct import UpdateCampaignInput, BiddingStrategyType
+        
+        input_data = UpdateCampaignInput(
+            campaign_id=12345678,
+            bidding_strategy_type=BiddingStrategyType.PAY_FOR_CONVERSION_CRR,
+            crr_limit=50.0,
+            goal_id=9876543
+        )
+        assert input_data.bidding_strategy_type == BiddingStrategyType.PAY_FOR_CONVERSION_CRR
+        assert input_data.crr_limit == 50.0
+        assert input_data.goal_id == 9876543
+
+    def test_create_campaign_input_with_average_cpa(self):
+        """Test CreateCampaignInput with AVERAGE_CPA strategy."""
+        from yandex_mcp.models.direct import CreateCampaignInput, BiddingStrategyType, CampaignType
+        
+        input_data = CreateCampaignInput(
+            name="Test Campaign",
+            start_date="2026-03-01",
+            campaign_type=CampaignType.TEXT_CAMPAIGN,
+            search_strategy_type=BiddingStrategyType.AVERAGE_CPA,
+            average_cpa=500.0,
+            goal_id=9876543
+        )
+        assert input_data.name == "Test Campaign"
+        assert input_data.search_strategy_type == BiddingStrategyType.AVERAGE_CPA
+        assert input_data.average_cpa == 500.0
+        assert input_data.goal_id == 9876543
+
+    def test_create_campaign_input_with_average_roi(self):
+        """Test CreateCampaignInput with AVERAGE_ROI strategy."""
+        from yandex_mcp.models.direct import CreateCampaignInput, BiddingStrategyType, CampaignType
+        
+        input_data = CreateCampaignInput(
+            name="Test ROI Campaign",
+            start_date="2026-03-01",
+            campaign_type=CampaignType.TEXT_CAMPAIGN,
+            search_strategy_type=BiddingStrategyType.AVERAGE_ROI,
+            roi_coef=2.0,
+            reserve_return=1.0,
+            goal_id=9876543
+        )
+        assert input_data.search_strategy_type == BiddingStrategyType.AVERAGE_ROI
+        assert input_data.roi_coef == 2.0
+        assert input_data.reserve_return == 1.0
+
+    def test_create_campaign_input_with_pay_for_conversion(self):
+        """Test CreateCampaignInput with PAY_FOR_CONVERSION strategy."""
+        from yandex_mcp.models.direct import CreateCampaignInput, BiddingStrategyType, CampaignType
+        
+        input_data = CreateCampaignInput(
+            name="Test PFC Campaign",
+            start_date="2026-03-01",
+            campaign_type=CampaignType.TEXT_CAMPAIGN,
+            search_strategy_type=BiddingStrategyType.PAY_FOR_CONVERSION,
+            max_conversion_cost=750.0,
+            goal_id=9876543
+        )
+        assert input_data.search_strategy_type == BiddingStrategyType.PAY_FOR_CONVERSION
+        assert input_data.max_conversion_cost == 750.0
+
+    def test_create_campaign_input_with_pay_for_conversion_crr(self):
+        """Test CreateCampaignInput with PAY_FOR_CONVERSION_CRR strategy."""
+        from yandex_mcp.models.direct import CreateCampaignInput, BiddingStrategyType, CampaignType
+        
+        input_data = CreateCampaignInput(
+            name="Test PFC CRR Campaign",
+            start_date="2026-03-01",
+            campaign_type=CampaignType.TEXT_CAMPAIGN,
+            search_strategy_type=BiddingStrategyType.PAY_FOR_CONVERSION_CRR,
+            crr_limit=75.0,
+            goal_id=9876543
+        )
+        assert input_data.search_strategy_type == BiddingStrategyType.PAY_FOR_CONVERSION_CRR
+        assert input_data.crr_limit == 75.0

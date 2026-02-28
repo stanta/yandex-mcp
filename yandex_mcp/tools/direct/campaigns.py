@@ -195,6 +195,50 @@ def register(mcp: FastMCP) -> None:
                     if conv_params:
                         search_strategy["WbMaximumConversionRate"] = conv_params
 
+                elif strategy_type == "AVERAGE_CPA":
+                    avg_cpa_params = {}
+                    if params.average_cpa:
+                        avg_cpa_params["AverageCpa"] = int(params.average_cpa * 1_000_000)
+                    if params.weekly_spend_limit:
+                        avg_cpa_params["WeeklySpendLimit"] = int(params.weekly_spend_limit * 1_000_000)
+                    if params.goal_id:
+                        avg_cpa_params["GoalId"] = params.goal_id
+                    if avg_cpa_params:
+                        search_strategy["AverageCpa"] = avg_cpa_params
+
+                elif strategy_type == "AVERAGE_ROI":
+                    avg_roi_params = {}
+                    if params.roi_coef is not None:
+                        avg_roi_params["RoiCoef"] = str(params.roi_coef)
+                    if params.reserve_return is not None:
+                        avg_roi_params["ReserveReturn"] = str(params.reserve_return)
+                    if params.weekly_spend_limit:
+                        avg_roi_params["WeeklySpendLimit"] = int(params.weekly_spend_limit * 1_000_000)
+                    if params.bid_ceiling:
+                        avg_roi_params["BidCeiling"] = int(params.bid_ceiling * 1_000_000)
+                    if params.goal_id:
+                        avg_roi_params["GoalId"] = params.goal_id
+                    if avg_roi_params:
+                        search_strategy["AverageRoi"] = avg_roi_params
+
+                elif strategy_type == "PAY_FOR_CONVERSION":
+                    pfc_params = {}
+                    if params.max_conversion_cost:
+                        pfc_params["MaxConversionCost"] = int(params.max_conversion_cost * 1_000_000)
+                    if params.goal_id:
+                        pfc_params["GoalId"] = params.goal_id
+                    if pfc_params:
+                        search_strategy["PayForConversion"] = pfc_params
+
+                elif strategy_type == "PAY_FOR_CONVERSION_CRR":
+                    pfc_crr_params = {}
+                    if params.crr_limit is not None:
+                        pfc_crr_params["CrrLimit"] = int(params.crr_limit * 1_000_000)  # Convert percent to micros
+                    if params.goal_id:
+                        pfc_crr_params["GoalId"] = params.goal_id
+                    if pfc_crr_params:
+                        search_strategy["PayForConversionCrr"] = pfc_crr_params
+
                 campaign_update["TextCampaign"] = {
                     "BiddingStrategy": {
                         "Search": search_strategy,
@@ -270,6 +314,70 @@ def register(mcp: FastMCP) -> None:
                     wb_params["BidCeiling"] = int(params.bid_ceiling * 1_000_000)
                 if wb_params:
                     search_strategy["WbMaximumClicks"] = wb_params
+
+            elif params.search_strategy_type.value == "AVERAGE_CPC":
+                avg_cpc_params = {}
+                if params.bid_ceiling:
+                    avg_cpc_params["AverageCpc"] = int(params.bid_ceiling * 1_000_000)
+                if params.weekly_spend_limit:
+                    avg_cpc_params["WeeklySpendLimit"] = int(params.weekly_spend_limit * 1_000_000)
+                if avg_cpc_params:
+                    search_strategy["AverageCpc"] = avg_cpc_params
+
+            elif params.search_strategy_type.value == "AVERAGE_CPA":
+                avg_cpa_params = {}
+                if params.average_cpa:
+                    avg_cpa_params["AverageCpa"] = int(params.average_cpa * 1_000_000)
+                if params.weekly_spend_limit:
+                    avg_cpa_params["WeeklySpendLimit"] = int(params.weekly_spend_limit * 1_000_000)
+                if params.goal_id:
+                    avg_cpa_params["GoalId"] = params.goal_id
+                if avg_cpa_params:
+                    search_strategy["AverageCpa"] = avg_cpa_params
+
+            elif params.search_strategy_type.value == "AVERAGE_ROI":
+                avg_roi_params = {}
+                if params.roi_coef is not None:
+                    avg_roi_params["RoiCoef"] = str(params.roi_coef)
+                if params.reserve_return is not None:
+                    avg_roi_params["ReserveReturn"] = str(params.reserve_return)
+                if params.weekly_spend_limit:
+                    avg_roi_params["WeeklySpendLimit"] = int(params.weekly_spend_limit * 1_000_000)
+                if params.bid_ceiling:
+                    avg_roi_params["BidCeiling"] = int(params.bid_ceiling * 1_000_000)
+                if params.goal_id:
+                    avg_roi_params["GoalId"] = params.goal_id
+                if avg_roi_params:
+                    search_strategy["AverageRoi"] = avg_roi_params
+
+            elif params.search_strategy_type.value == "PAY_FOR_CONVERSION":
+                pfc_params = {}
+                if params.max_conversion_cost:
+                    pfc_params["MaxConversionCost"] = int(params.max_conversion_cost * 1_000_000)
+                if params.goal_id:
+                    pfc_params["GoalId"] = params.goal_id
+                if pfc_params:
+                    search_strategy["PayForConversion"] = pfc_params
+
+            elif params.search_strategy_type.value == "PAY_FOR_CONVERSION_CRR":
+                pfc_crr_params = {}
+                if params.crr_limit is not None:
+                    pfc_crr_params["CrrLimit"] = int(params.crr_limit * 1_000_000)
+                if params.goal_id:
+                    pfc_crr_params["GoalId"] = params.goal_id
+                if pfc_crr_params:
+                    search_strategy["PayForConversionCrr"] = pfc_crr_params
+
+            elif params.search_strategy_type.value == "WB_MAXIMUM_CONVERSION_RATE":
+                conv_params = {}
+                if params.weekly_spend_limit:
+                    conv_params["WeeklySpendLimit"] = int(params.weekly_spend_limit * 1_000_000)
+                if params.bid_ceiling:
+                    conv_params["BidCeiling"] = int(params.bid_ceiling * 1_000_000)
+                if params.goal_id:
+                    conv_params["GoalId"] = params.goal_id
+                if conv_params:
+                    search_strategy["WbMaximumConversionRate"] = conv_params
 
             # Handle network strategy for РСЯ / Smart
             if params.network_strategy_type.value == "NETWORK_DEFAULT":
