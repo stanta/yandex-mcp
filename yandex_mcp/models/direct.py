@@ -403,6 +403,18 @@ class UpdateAdGroupInput(BaseModel):
     )
 
 
+class ManageAdGroupInput(BaseModel):
+    """Input for managing ad group state (suspend/resume/archive/unarchive)."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    adgroup_ids: List[int] = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Ad group IDs to manage (max 1000 per request)"
+    )
+
+
 # =============================================================================
 # Ad Models
 # =============================================================================

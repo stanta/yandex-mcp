@@ -6,15 +6,15 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io/)
 
-MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, and **Yandex Wordstat** APIs. Provides **128 tools** for managing advertising campaigns, analytics, keyword research, and reporting through any MCP-compatible client.
+MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, and **Yandex Wordstat** APIs. Provides **132 tools** for managing advertising campaigns, analytics, keyword research, and reporting through any MCP-compatible client.
 
 > Manage Yandex advertising and analytics through AI
 
 ## Features
 
-### Yandex Direct API v5 (80 tools)
+### Yandex Direct API v5 (84 tools)
 - **Campaigns** — create, update, pause, resume, archive, delete
-- **Ad Groups** — create, update with targeting settings
+- **Ad Groups** — create, update, pause, resume, archive, unarchive with targeting settings
 - **Ads** — text, image, dynamic, shopping ads with moderation
 - **Keywords** — manage keywords and bids
 - **Statistics** — detailed performance reports with async retry
@@ -105,9 +105,9 @@ Add to your MCP client settings:
 | `YANDEX_CLIENT_LOGIN` | No | Client login for agency accounts |
 | `YANDEX_USE_SANDBOX` | No | Set to `true` for sandbox API |
 
-## Tools (128)
+## Tools (132)
 
-### Yandex Direct (80 tools)
+### Yandex Direct (84 tools)
 
 #### Campaigns (8)
 
@@ -122,13 +122,17 @@ Add to your MCP client settings:
 | `direct_unarchive_campaigns` | Restore archived campaigns |
 | `direct_delete_campaigns` | Delete campaigns permanently |
 
-#### Ad Groups (3)
+#### Ad Groups (7)
 
 | Tool | Description |
 |------|-------------|
 | `direct_get_adgroups` | Get ad groups with targeting settings |
 | `direct_create_adgroup` | Create a new ad group in a campaign |
 | `direct_update_adgroup` | Update ad group settings and targeting |
+| `direct_suspend_adgroups` | Pause ad groups |
+| `direct_resume_adgroups` | Resume paused ad groups |
+| `direct_archive_adgroups` | Archive ad groups |
+| `direct_unarchive_adgroups` | Restore archived ad groups |
 
 #### Ads (12)
 

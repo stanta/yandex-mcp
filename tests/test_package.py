@@ -13,10 +13,14 @@ EXPECTED_DIRECT_TOOLS = [
     "direct_archive_campaigns",
     "direct_unarchive_campaigns",
     "direct_delete_campaigns",
-    # Ad Groups (3)
+    # Ad Groups (7)
     "direct_get_adgroups",
     "direct_create_adgroup",
     "direct_update_adgroup",
+    "direct_suspend_adgroups",
+    "direct_resume_adgroups",
+    "direct_archive_adgroups",
+    "direct_unarchive_adgroups",
     # Ads (12)
     "direct_get_ads",
     "direct_create_text_ad",
