@@ -24,6 +24,7 @@ def register_direct_tools(mcp: FastMCP) -> None:
         feeds,
         images,
         smartadtargets,
+        dynamic_text_ad_targets,
     )
 
     # Core tools
@@ -47,3 +48,4 @@ def register_direct_tools(mcp: FastMCP) -> None:
     feeds.register(mcp)
     images.register(mcp)
     smartadtargets.register(mcp)
+    dynamic_text_ad_targets.register(mcp)

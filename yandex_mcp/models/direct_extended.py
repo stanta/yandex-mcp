@@ -447,3 +447,64 @@ class DeleteImagesInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     ad_image_hashes: List[str] = Field(..., min_length=1, description="Image hashes to delete")
+
+
+# =============================================================================
+# DynamicTextAdTargets Models
+# =============================================================================
+
+class DynamicTextAdTargetCondition(BaseModel):
+    """A single filter condition for dynamic text ad targeting."""
+    operand: str = Field(..., description="Feed field name (e.g., 'price', 'manufacturer', 'category_id', 'url', 'title')")
+    operator: str = Field(..., description="Operator: EQUALS_ANY, CONTAINS_ANY, NOT_CONTAINS_ALL, GREATER_THAN, LESS_THAN, IN_RANGE, EXISTS")
+    arguments: List[str] = Field(..., description="Values to match (max 50). For IN_RANGE use 'min-max' format.")
+
+
+class GetDynamicTextAdTargetsInput(BaseModel):
+    """Input for getting dynamic text ad targets."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    campaign_ids: Optional[List[int]] = Field(default=None, description="Filter by campaign IDs")
+    adgroup_ids: Optional[List[int]] = Field(default=None, description="Filter by ad group IDs")
+    target_ids: Optional[List[int]] = Field(default=None, description="Filter by target IDs")
+    limit: int = Field(default=100, ge=1, le=10000)
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+class AddDynamicTextAdTargetInput(BaseModel):
+    """Input for adding a dynamic text ad target."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    adgroup_id: int = Field(..., description="Ad group ID (dynamic text ad group)")
+    name: str = Field(..., max_length=255, description="Target name")
+    auto_budget: bool = Field(default=True, description="Use campaign budget (YES) or set manual bid (NO)")
+    bid: Optional[float] = Field(default=None, gt=0, description="Manual bid (if auto_budget is NO)")
+    conditions: Optional[List[DynamicTextAdTargetCondition]] = Field(
+        default=None,
+        description="Filter conditions. If empty, all feed items are used."
+    )
+
+
+class UpdateDynamicTextAdTargetInput(BaseModel):
+    """Input for updating a dynamic text ad target."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    target_id: int = Field(..., description="Dynamic text ad target ID")
+    name: Optional[str] = Field(default=None, max_length=255, description="New name")
+    auto_budget: Optional[bool] = Field(default=None, description="Use campaign budget (YES) or set manual bid (NO)")
+    bid: Optional[float] = Field(default=None, gt=0, description="Manual bid (if auto_budget is NO)")
+    conditions: Optional[List[DynamicTextAdTargetCondition]] = Field(default=None, description="New conditions")
+
+
+class ManageDynamicTextAdTargetsInput(BaseModel):
+    """Input for managing dynamic text ad targets (suspend/resume/delete)."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    target_ids: List[int] = Field(..., min_length=1, description="Dynamic text ad target IDs")
+
+
+class DeleteDynamicTextAdTargetsInput(BaseModel):
+    """Input for deleting dynamic text ad targets."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    target_ids: List[int] = Field(..., min_length=1, description="Dynamic text ad target IDs to delete")

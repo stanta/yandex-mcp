@@ -12,7 +12,7 @@ MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, a
 
 ## Features
 
-### Yandex Direct API v5 (84 tools)
+### Yandex Direct API v5 (90 tools)
 - **Campaigns** — create, update, pause, resume, archive, delete
 - **Ad Groups** — create, update, pause, resume, archive, unarchive with targeting settings
 - **Ads** — text, image, dynamic, shopping ads with moderation
@@ -21,6 +21,7 @@ MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, a
 - **Bid Modifiers** — mobile, desktop, demographics, regional adjustments
 - **Retargeting** — retargeting lists and audience targets
 - **Smart Ad Targets** — feed-based targeting filters
+- **Dynamic Text Ad Targets** — autotargeting for dynamic text ads
 - **Sitelinks, VCards, Callouts** — ad extensions
 - **Images** — upload, manage, and delete ad images
 - **Feeds** — product feed management
@@ -105,9 +106,9 @@ Add to your MCP client settings:
 | `YANDEX_CLIENT_LOGIN` | No | Client login for agency accounts |
 | `YANDEX_USE_SANDBOX` | No | Set to `true` for sandbox API |
 
-## Tools (132)
+## Tools (138)
 
-### Yandex Direct (84 tools)
+### Yandex Direct (90 tools)
 
 #### Campaigns (8)
 
@@ -210,6 +211,17 @@ Add to your MCP client settings:
 | `direct_suspend_smart_ad_targets` | Pause smart ad targets |
 | `direct_resume_smart_ad_targets` | Resume smart ad targets |
 | `direct_delete_smart_ad_targets` | Delete smart ad targets |
+
+#### Dynamic Text Ad Targets (6)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_dynamic_text_ad_targets` | Get dynamic text ad target filters and conditions |
+| `direct_add_dynamic_text_ad_target` | Add an autotargeting filter to a dynamic text ad group |
+| `direct_update_dynamic_text_ad_target` | Update dynamic text ad target settings |
+| `direct_suspend_dynamic_text_ad_targets` | Pause dynamic text ad targets |
+| `direct_resume_dynamic_text_ad_targets` | Resume dynamic text ad targets |
+| `direct_delete_dynamic_text_ad_targets` | Delete dynamic text ad targets |
 
 #### Sitelinks (3)
 

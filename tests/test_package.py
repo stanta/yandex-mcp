@@ -66,6 +66,13 @@ EXPECTED_DIRECT_TOOLS = [
     "direct_suspend_smart_ad_targets",
     "direct_resume_smart_ad_targets",
     "direct_delete_smart_ad_targets",
+    # Dynamic Text Ad Targets (6)
+    "direct_get_dynamic_text_ad_targets",
+    "direct_add_dynamic_text_ad_target",
+    "direct_update_dynamic_text_ad_target",
+    "direct_suspend_dynamic_text_ad_targets",
+    "direct_resume_dynamic_text_ad_targets",
+    "direct_delete_dynamic_text_ad_targets",
     # Sitelinks (3)
     "direct_get_sitelinks",
     "direct_add_sitelinks",
