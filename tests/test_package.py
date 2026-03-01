@@ -210,17 +210,27 @@ EXPECTED_WORDSTAT_TOOLS = [
     "wordstat_user_info",
 ]
 
+EXPECTED_OAUTH_TOOLS = [
+    "oauth_get_authorization_url",
+    "oauth_check_token_status",
+    "oauth_revoke_token",
+    "oauth_exchange_code",
+    "oauth_poll_device_token",
+    "oauth_refresh_token",
+    "oauth_get_device_code",
+]
+
 
 class TestToolRegistration:
     """Test that all tools are properly registered."""
 
     def test_total_tool_count(self, mcp_instance):
         tools = list(mcp_instance._tool_manager._tools.keys())
-        expected = len(EXPECTED_DIRECT_TOOLS) + len(EXPECTED_METRIKA_TOOLS) + len(EXPECTED_WORDSTAT_TOOLS)
+        expected = len(EXPECTED_DIRECT_TOOLS) + len(EXPECTED_METRIKA_TOOLS) + len(EXPECTED_WORDSTAT_TOOLS) + len(EXPECTED_OAUTH_TOOLS)
         assert len(tools) == expected, (
             f"Expected {expected} tools, got {len(tools)}. "
-            f"Missing: {set(EXPECTED_DIRECT_TOOLS + EXPECTED_METRIKA_TOOLS + EXPECTED_WORDSTAT_TOOLS) - set(tools)}. "
-            f"Extra: {set(tools) - set(EXPECTED_DIRECT_TOOLS + EXPECTED_METRIKA_TOOLS + EXPECTED_WORDSTAT_TOOLS)}"
+            f"Missing: {set(EXPECTED_DIRECT_TOOLS + EXPECTED_METRIKA_TOOLS + EXPECTED_WORDSTAT_TOOLS + EXPECTED_OAUTH_TOOLS) - set(tools)}. "
+            f"Extra: {set(tools) - set(EXPECTED_DIRECT_TOOLS + EXPECTED_METRIKA_TOOLS + EXPECTED_WORDSTAT_TOOLS + EXPECTED_OAUTH_TOOLS)}"
         )
 
     def test_direct_tool_count(self, mcp_instance):
@@ -267,7 +277,7 @@ class TestToolNaming:
             assert tool.startswith("wordstat_"), f"Wordstat tool not properly prefixed: {tool}"
 
     def test_no_unknown_prefixes(self, mcp_instance):
-        known_prefixes = ("direct_", "metrika_", "wordstat_")
+        known_prefixes = ("direct_", "metrika_", "wordstat_", "oauth_")
         for tool in mcp_instance._tool_manager._tools:
             assert any(tool.startswith(p) for p in known_prefixes), f"Unknown prefix in tool: {tool}"
 

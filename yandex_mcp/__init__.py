@@ -18,7 +18,7 @@ mcp = FastMCP("yandex_mcp")
 register_all_tools(mcp)
 
 
-def run():
+def run() -> None:
     """Run the MCP server."""
     mcp.run()
 
