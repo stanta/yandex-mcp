@@ -463,6 +463,21 @@ class DeleteImagesInput(BaseModel):
     ad_image_hashes: List[str] = Field(..., min_length=1, description="Image hashes to delete")
 
 
+class UpdateImageInput(BaseModel):
+    """Input for updating a single ad image."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    ad_image_hash: str = Field(..., description="Image hash to update")
+    name: Optional[str] = Field(default=None, max_length=255, description="New image name")
+
+
+class UpdateImagesInput(BaseModel):
+    """Input for updating ad images."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    images: List[UpdateImageInput] = Field(..., min_length=1, max_length=100, description="Images to update")
+
+
 # =============================================================================
 # DynamicTextAdTargets Models
 # =============================================================================

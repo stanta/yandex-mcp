@@ -6,13 +6,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io/)
 
-MCP (Model Context Protocol) сервер для **Yandex Direct**, **Yandex Metrika** и **Yandex Wordstat** API. Предоставляет **140 инструментов** для управления рекламными кампаниями, аналитикой, исследованием ключевых слов и отчётностью через любой MCP-совместимый клиент.
+MCP (Model Context Protocol) сервер для **Yandex Direct**, **Yandex Metrika** и **Yandex Wordstat** API. Предоставляет **141 инструмент** для управления рекламными кампаниями, аналитикой, исследованием ключевых слов и отчётностью через любой MCP-совместимый клиент.
 
 > Управляй рекламой и аналитикой Яндекса через AI
 
 ## Возможности
 
-### Yandex Direct API v5 (105 инструментов)
+### Yandex Direct API v5 (106 инструментов)
 - **Кампании** — создание, обновление, приостановка, возобновление, архивирование, удаление
 - **Группы объявлений** — создание, обновление, приостановка, возобновление, архивирование, разархивирование с настройками таргетинга
 - **Объявления** — текстовые, графические, динамические, товарные с модерацией
@@ -108,9 +108,9 @@ YANDEX_TOKEN=ваш_oauth_токен
 | `YANDEX_CLIENT_LOGIN` | Нет | Логин клиента для агентских аккаунтов |
 | `YANDEX_USE_SANDBOX` | Нет | `true` для использования песочницы |
 
-## Инструменты (153)
+## Инструменты (154)
 
-### Yandex Direct (105 инструментов)
+### Yandex Direct (106 инструментов)
 
 #### Кампании (8)
 
@@ -284,12 +284,13 @@ YANDEX_TOKEN=ваш_oauth_токен
 | `direct_update_feed` | Обновить настройки фида |
 | `direct_delete_feeds` | Удалить фиды |
 
-#### Изображения (3)
+#### Изображения (4)
 
 | Инструмент | Описание |
 |------------|----------|
 | `direct_upload_image` | Загрузить изображение в base64 (JPEG, GIF, PNG) |
 | `direct_get_images` | Получить метаданные изображений, хеши и статус привязки |
+| `direct_update_image` | Обновить свойства изображения (название) |
 | `direct_delete_images` | Удалить непривязанные изображения по хешу |
 
 #### Справочники и регионы (3)
@@ -509,7 +510,7 @@ yandex_mcp/
 │   ├── metrika.py
 │   └── wordstat.py
 └── tools/               # Определения MCP-инструментов
-    ├── direct/          # 105 инструментов Yandex Direct
+    ├── direct/          # 106 инструментов Yandex Direct
     │   ├── _helpers.py  # Фабрика для manage-операций
     │   ├── campaigns.py
     │   ├── adgroups.py

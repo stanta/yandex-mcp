@@ -105,9 +105,10 @@ EXPECTED_DIRECT_TOOLS = [
     "direct_add_feed",
     "direct_update_feed",
     "direct_delete_feeds",
-    # Images (3)
+    # Images (4)
     "direct_upload_image",
     "direct_get_images",
+    "direct_update_image",
     "direct_delete_images",
     # Dictionaries & Regions (3)
     "direct_get_dictionaries",

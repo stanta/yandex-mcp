@@ -6,13 +6,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io/)
 
-MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, and **Yandex Wordstat** APIs. Provides **160 tools** for managing advertising campaigns, analytics, keyword research, and reporting through any MCP-compatible client.
+MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, and **Yandex Wordstat** APIs. Provides **161 tools** for managing advertising campaigns, analytics, keyword research, and reporting through any MCP-compatible client.
 
 > Manage Yandex advertising and analytics through AI
 
 ## Features
 
-### Yandex Direct API v5 (112 tools)
+### Yandex Direct API v5 (113 tools)
 - **Campaigns** — create, update, pause, resume, archive, delete
 - **Ad Groups** — create, update, pause, resume, archive, unarchive with targeting settings
 - **Ads** — text, image, dynamic, shopping ads with moderation
@@ -112,7 +112,7 @@ Add to your MCP client settings:
 
 ## Tools (160)
 
-### Yandex Direct (112 tools)
+### Yandex Direct (113 tools)
 
 #### Campaigns (8)
 
@@ -288,12 +288,13 @@ Add to your MCP client settings:
 | `direct_update_feed` | Update feed settings |
 | `direct_delete_feeds` | Delete feeds |
 
-#### Images (3)
+#### Images (4)
 
 | Tool | Description |
 |------|-------------|
 | `direct_upload_image` | Upload a base64-encoded image (JPEG, GIF, PNG) |
 | `direct_get_images` | Get image metadata, hashes, and association status |
+| `direct_update_image` | Update image properties (name) |
 | `direct_delete_images` | Delete unassociated images by hash |
 
 #### Dictionaries & Regions (3)
