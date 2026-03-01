@@ -6,13 +6,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io/)
 
-MCP (Model Context Protocol) сервер для **Yandex Direct**, **Yandex Metrika** и **Yandex Wordstat** API. Предоставляет **137 инструментов** для управления рекламными кампаниями, аналитикой, исследованием ключевых слов и отчётностью через любой MCP-совместимый клиент.
+MCP (Model Context Protocol) сервер для **Yandex Direct**, **Yandex Metrika** и **Yandex Wordstat** API. Предоставляет **139 инструментов** для управления рекламными кампаниями, аналитикой, исследованием ключевых слов и отчётностью через любой MCP-совместимый клиент.
 
 > Управляй рекламой и аналитикой Яндекса через AI
 
 ## Возможности
 
-### Yandex Direct API v5 (95 инструментов)
+### Yandex Direct API v5 (99 инструментов)
 - **Кампании** — создание, обновление, приостановка, возобновление, архивирование, удаление
 - **Группы объявлений** — создание, обновление, приостановка, возобновление, архивирование, разархивирование с настройками таргетинга
 - **Объявления** — текстовые, графические, динамические, товарные с модерацией
@@ -107,9 +107,9 @@ YANDEX_TOKEN=ваш_oauth_токен
 | `YANDEX_CLIENT_LOGIN` | Нет | Логин клиента для агентских аккаунтов |
 | `YANDEX_USE_SANDBOX` | Нет | `true` для использования песочницы |
 
-## Инструменты (143)
+## Инструменты (147)
 
-### Yandex Direct (95 инструментов)
+### Yandex Direct (99 инструментов)
 
 #### Кампании (8)
 
@@ -257,14 +257,21 @@ YANDEX_TOKEN=ваш_oauth_токен
 | `direct_add_callouts` | Добавить уточнения |
 | `direct_link_callouts_to_ad` | Привязать уточнения к объявлению |
 
-#### Видео и креативы (4)
+#### Видео и креативы (6)
 
 | Инструмент | Описание |
 |------------|----------|
 | `direct_upload_video` | Загрузить видео для расширений |
 | `direct_get_advideos` | Получить загруженные видео |
-| `direct_create_video_creative` | Создать видеокреатив |
+| `direct_create_video_creative` | Создать VIDEO_EXTENSION_CREATIVE из загруженного видео |
+| `direct_create_cpc_video_creative` | Создать CPC_VIDEO_CREATIVE (для поисковых кампаний) |
+| `direct_create_cpm_video_creative` | Создать CPM_VIDEO_CREATIVE (для медийных кампаний) |
 | `direct_get_creatives` | Получить видеокреативы |
+
+**Типы креативов:**
+- `VIDEO_EXTENSION_CREATIVE` — Видео-расширения
+- `CPC_VIDEO_CREATIVE` — Видеообъявления для поисковых кампаний
+- `CPM_VIDEO_CREATIVE` — Видеообъявления для медийных кампаний
 
 #### Фиды (4)
 

@@ -6,13 +6,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io/)
 
-MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, and **Yandex Wordstat** APIs. Provides **137 tools** for managing advertising campaigns, analytics, keyword research, and reporting through any MCP-compatible client.
+MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, and **Yandex Wordstat** APIs. Provides **139 tools** for managing advertising campaigns, analytics, keyword research, and reporting through any MCP-compatible client.
 
 > Manage Yandex advertising and analytics through AI
 
 ## Features
 
-### Yandex Direct API v5 (97 tools)
+### Yandex Direct API v5 (99 tools)
 - **Campaigns** — create, update, pause, resume, archive, delete
 - **Ad Groups** — create, update, pause, resume, archive, unarchive with targeting settings
 - **Ads** — text, image, dynamic, shopping ads with moderation
@@ -108,9 +108,9 @@ Add to your MCP client settings:
 | `YANDEX_CLIENT_LOGIN` | No | Client login for agency accounts |
 | `YANDEX_USE_SANDBOX` | No | Set to `true` for sandbox API |
 
-## Tools (145)
+## Tools (147)
 
-### Yandex Direct (97 tools)
+### Yandex Direct (99 tools)
 
 #### Campaigns (8)
 
@@ -258,14 +258,21 @@ Add to your MCP client settings:
 | `direct_add_callouts` | Add callout extensions |
 | `direct_link_callouts_to_ad` | Link callouts to an ad |
 
-#### Videos & Creatives (4)
+#### Videos & Creatives (6)
 
 | Tool | Description |
 |------|-------------|
 | `direct_upload_video` | Upload a video for ad extensions |
 | `direct_get_advideos` | Get uploaded ad videos |
-| `direct_create_video_creative` | Create a video creative from uploaded video |
+| `direct_create_video_creative` | Create a VIDEO_EXTENSION_CREATIVE from uploaded video |
+| `direct_create_cpc_video_creative` | Create a CPC_VIDEO_CREATIVE (for search campaigns) |
+| `direct_create_cpm_video_creative` | Create a CPM_VIDEO_CREATIVE (for display campaigns) |
 | `direct_get_creatives` | Get video creatives |
+
+**Creative Types:**
+- `VIDEO_EXTENSION_CREATIVE` — Video extension ads
+- `CPC_VIDEO_CREATIVE` — Video ads for search campaigns
+- `CPM_VIDEO_CREATIVE` — Video ads for display campaigns
 
 #### Feeds (4)
 

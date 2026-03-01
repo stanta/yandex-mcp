@@ -90,10 +90,12 @@ EXPECTED_DIRECT_TOOLS = [
     "direct_get_adextensions",
     "direct_add_callouts",
     "direct_link_callouts_to_ad",
-    # Videos & Creatives (4)
+    # Videos & Creatives (6)
     "direct_upload_video",
     "direct_get_advideos",
     "direct_create_video_creative",
+    "direct_create_cpc_video_creative",
+    "direct_create_cpm_video_creative",
     "direct_get_creatives",
     # Feeds (4)
     "direct_get_feeds",
@@ -730,3 +732,80 @@ class TestAgencyClientsModels:
         assert input_data.login == "client_login"
         assert input_data.settings is None
         assert input_data.notification is None
+
+
+class TestCreativesModels:
+    """Test Creatives input models."""
+
+    def test_create_video_extension_creative_input_model(self):
+        """Test CreateVideoExtensionCreativeInput model."""
+        from yandex_mcp.tools.direct.creatives import CreateVideoExtensionCreativeInput
+        
+        input_data = CreateVideoExtensionCreativeInput(
+            video_id="abc123"
+        )
+        assert input_data.video_id == "abc123"
+
+    def test_create_cpc_video_creative_input_model(self):
+        """Test CreateCPCVideoCreativeInput model."""
+        from yandex_mcp.tools.direct.creatives import CreateCPCVideoCreativeInput
+        
+        # Test with only required fields
+        input_data = CreateCPCVideoCreativeInput(
+            video_id="abc123"
+        )
+        assert input_data.video_id == "abc123"
+        assert input_data.title is None
+        assert input_data.trailer_version is None
+        
+        # Test with optional fields
+        input_data_full = CreateCPCVideoCreativeInput(
+            video_id="def456",
+            title="My Video Ad",
+            trailer_version="FULL"
+        )
+        assert input_data_full.video_id == "def456"
+        assert input_data_full.title == "My Video Ad"
+        assert input_data_full.trailer_version == "FULL"
+
+    def test_create_cpm_video_creative_input_model(self):
+        """Test CreateCPMVideoCreativeInput model."""
+        from yandex_mcp.tools.direct.creatives import CreateCPMVideoCreativeInput
+        
+        # Test with only required fields
+        input_data = CreateCPMVideoCreativeInput(
+            video_id="abc123"
+        )
+        assert input_data.video_id == "abc123"
+        assert input_data.title is None
+        assert input_data.trailer_version is None
+        
+        # Test with optional fields
+        input_data_full = CreateCPMVideoCreativeInput(
+            video_id="ghi789",
+            title="Display Video Ad",
+            trailer_version="SHORT"
+        )
+        assert input_data_full.video_id == "ghi789"
+        assert input_data_full.title == "Display Video Ad"
+        assert input_data_full.trailer_version == "SHORT"
+
+    def test_get_creatives_input_model(self):
+        """Test GetCreativesInput model."""
+        from yandex_mcp.tools.direct.creatives import GetCreativesInput
+        
+        # Test with default values
+        input_data = GetCreativesInput()
+        assert input_data.creative_ids is None
+        assert input_data.types is None
+        assert input_data.limit == 100
+        
+        # Test with filters
+        input_data_filtered = GetCreativesInput(
+            creative_ids=[123, 456],
+            types=["CPC_VIDEO_CREATIVE", "CPM_VIDEO_CREATIVE"],
+            limit=50
+        )
+        assert input_data_filtered.creative_ids == [123, 456]
+        assert input_data_filtered.types == ["CPC_VIDEO_CREATIVE", "CPM_VIDEO_CREATIVE"]
+        assert input_data_filtered.limit == 50
