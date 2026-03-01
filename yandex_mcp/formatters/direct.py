@@ -15,6 +15,24 @@ def format_campaigns_markdown(campaigns: List[Dict]) -> str:
         lines.append(f"- **State**: {camp.get('State', 'N/A')}")
         lines.append(f"- **Status**: {camp.get('Status', 'N/A')}")
 
+        if camp.get("WalletId"):
+            lines.append(f"- **Wallet ID**: {camp.get('WalletId')}")
+
+        if camp.get("TimeZone"):
+            lines.append(f"- **Time Zone**: {camp.get('TimeZone')}")
+
+        if camp.get("Notification"):
+            notif = camp["Notification"]
+            notif_parts = []
+            if notif.get("Email"):
+                notif_parts.append(f"email: {notif.get('Email')}")
+            if notif.get("Phone"):
+                notif_parts.append(f"phone: {notif.get('Phone')}")
+            if notif.get("Push"):
+                notif_parts.append(f"push: {notif.get('Push')}")
+            if notif_parts:
+                lines.append(f"- **Notification**: {', '.join(notif_parts)}")
+
         if camp.get("DailyBudget"):
             budget = camp["DailyBudget"]
             amount = budget.get("Amount", 0) / 1_000_000

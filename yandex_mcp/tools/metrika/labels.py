@@ -79,7 +79,7 @@ def register(mcp: FastMCP) -> None:
             result = await api_client.metrika_request(
                 "management/v1/labels",
                 method="POST",
-                json_data={"label": {"name": params.name}}
+                data={"label": {"name": params.name}}
             )
 
             label = result.get("label", {})
@@ -107,7 +107,7 @@ def register(mcp: FastMCP) -> None:
             result = await api_client.metrika_request(
                 f"management/v1/label/{params.label_id}",
                 method="PUT",
-                json_data={"label": {"name": params.name}}
+                data={"label": {"name": params.name}}
             )
 
             label = result.get("label", {})
@@ -259,7 +259,7 @@ def register(mcp: FastMCP) -> None:
             result = await api_client.metrika_request(
                 f"management/v1/counter/{params.counter_id}/chart_annotation",
                 method="POST",
-                json_data={"annotation": annotation_data}
+                data={"annotation": annotation_data}
             )
 
             annotation = result.get("annotation", {})
@@ -293,7 +293,7 @@ def register(mcp: FastMCP) -> None:
             result = await api_client.metrika_request(
                 f"management/v1/counter/{params.counter_id}/chart_annotation/{params.annotation_id}",
                 method="PUT",
-                json_data={"annotation": annotation_data}
+                data={"annotation": annotation_data}
             )
 
             return f"Annotation {params.annotation_id} updated successfully."
@@ -388,7 +388,7 @@ def register(mcp: FastMCP) -> None:
             result = await api_client.metrika_request(
                 "management/v1/delegates",
                 method="POST",
-                json_data={"delegate": delegate_data}
+                data={"delegate": delegate_data}
             )
 
             return f"Delegate {params.user_login} added successfully."

@@ -5,7 +5,7 @@ from mcp.server.fastmcp import FastMCP
 
 from ...client import api_client
 from ...models.common import ResponseFormat
-from ...models.direct_extended import GetImagesInput, UploadImageInput, DeleteImagesInput
+from ...models.direct_extended import GetImagesInput, UploadImageInput, DeleteImagesInput, UpdateImagesInput
 from ...utils import handle_api_error
 
 
@@ -179,6 +179,63 @@ def register(mcp: FastMCP) -> None:
             response = f"Successfully deleted {len(success)} image(s)."
             if success:
                 response += "\nDeleted hashes: " + ", ".join(success)
+            if errors:
+                response += f"\n\nErrors:\n" + "\n".join(f"- {e}" for e in errors)
+
+            return response
+
+        except Exception as e:
+            return handle_api_error(e)
+
+    @mcp.tool(
+        name="direct_update_image",
+        annotations={
+            "title": "Update Ad Image in Yandex Direct",
+            "readOnlyHint": False,
+            "destructiveHint": False,
+            "idempotentHint": True,
+            "openWorldHint": False
+        }
+    )
+    async def direct_update_image(params: UpdateImagesInput) -> str:
+        """Update ad image properties (name).
+
+        Use this to rename uploaded images. Only the name can be updated.
+        Provide the image hash and new name.
+        """
+        try:
+            images_to_update = []
+            for img in params.images:
+                update_item = {"AdImageHash": img.ad_image_hash}
+                if img.name is not None:
+                    update_item["Name"] = img.name
+                images_to_update.append(update_item)
+
+            request_params = {"AdImages": images_to_update}
+
+            result = await api_client.direct_request("adimages", "update", request_params)
+
+            if "error" in result:
+                err = result["error"]
+                return f"API Error: {err.get('error_code')}: {err.get('error_string')} | {err.get('error_detail', '')}"
+
+            update_results = result.get("result", {}).get("UpdateResults", [])
+
+            success = []
+            errors = []
+            for r in update_results:
+                img_hash = r.get("AdImageHash", "?")
+                if r.get("AdImageHash") and not r.get("Errors"):
+                    success.append(img_hash)
+                if r.get("Errors"):
+                    errors.extend([
+                        f"Hash {img_hash}: {e.get('Message')}"
+                        for e in r["Errors"]
+                    ])
+
+            response = f"Successfully updated {len(success)} image(s)."
+            if success:
+                response += "\nUpdated hashes: " + ", ".join(success)
             if errors:
                 response += f"\n\nErrors:\n" + "\n".join(f"- {e}" for e in errors)
 

@@ -190,6 +190,33 @@ class UpdateCampaignInput(BaseModel):
         default=None,
         description="Metrika goal ID for conversion optimization strategies"
     )
+    # Additional bidding strategy parameters
+    average_cpa: Optional[float] = Field(
+        default=None,
+        gt=0,
+        description="Target average CPA in currency units (for AVERAGE_CPA strategy)"
+    )
+    roi_coef: Optional[float] = Field(
+        default=None,
+        ge=0,
+        description="ROI coefficient for AVERAGE_ROI strategy (e.g., 1.0 = break-even)"
+    )
+    reserve_return: Optional[float] = Field(
+        default=None,
+        ge=0,
+        description="Minimum acceptable return on ad spend for AVERAGE_ROI strategy"
+    )
+    max_conversion_cost: Optional[float] = Field(
+        default=None,
+        gt=0,
+        description="Maximum cost per conversion in currency units (for PAY_FOR_CONVERSION strategy)"
+    )
+    crr_limit: Optional[float] = Field(
+        default=None,
+        ge=0,
+        le=100,
+        description="CRR (Conversion Revenue Ratio) limit in percent 0-100 (for PAY_FOR_CONVERSION_CRR strategy)"
+    )
     counter_ids: Optional[List[int]] = Field(
         default=None,
         description="Metrika counter IDs to attach to the campaign"
@@ -278,6 +305,33 @@ class CreateCampaignInput(BaseModel):
         default=None,
         gt=0,
         description="Conversion value in currency"
+    )
+    # Additional bidding strategy parameters for create
+    average_cpa: Optional[float] = Field(
+        default=None,
+        gt=0,
+        description="Target average CPA in currency units (for AVERAGE_CPA strategy)"
+    )
+    roi_coef: Optional[float] = Field(
+        default=None,
+        ge=0,
+        description="ROI coefficient for AVERAGE_ROI strategy (e.g., 1.0 = break-even)"
+    )
+    reserve_return: Optional[float] = Field(
+        default=None,
+        ge=0,
+        description="Minimum acceptable return on ad spend for AVERAGE_ROI strategy"
+    )
+    max_conversion_cost: Optional[float] = Field(
+        default=None,
+        gt=0,
+        description="Maximum cost per conversion in currency units (for PAY_FOR_CONVERSION strategy)"
+    )
+    crr_limit: Optional[float] = Field(
+        default=None,
+        ge=0,
+        le=100,
+        description="CRR (Conversion Revenue Ratio) limit in percent 0-100 (for PAY_FOR_CONVERSION_CRR strategy)"
     )
     # Bidding strategy for search
     search_strategy_type: BiddingStrategyType = Field(
@@ -400,6 +454,18 @@ class UpdateAdGroupInput(BaseModel):
     tracking_params: Optional[str] = Field(
         default=None,
         description="Tracking parameters for all ads in group"
+    )
+
+
+class ManageAdGroupInput(BaseModel):
+    """Input for managing ad group state (suspend/resume/archive/unarchive)."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    adgroup_ids: List[int] = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Ad group IDs to manage (max 1000 per request)"
     )
 
 

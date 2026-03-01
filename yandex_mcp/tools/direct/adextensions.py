@@ -36,6 +36,21 @@ class LinkCalloutsToAdInput(BaseModel):
     callout_ids: List[int] = Field(..., min_length=1, description="Callout extension IDs to link")
 
 
+class UpdateCalloutInput(BaseModel):
+    """Input for updating callout extensions."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    extension_id: int = Field(..., description="Callout extension ID to update")
+    callout_text: str = Field(..., min_length=1, max_length=25, description="New callout text (max 25 chars)")
+
+
+class DeleteAdExtensionsInput(BaseModel):
+    """Input for deleting ad extensions."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    extension_ids: List[int] = Field(..., min_length=1, description="List of extension IDs to delete")
+
+
 def register(mcp: FastMCP) -> None:
     """Register ad extension tools."""
 
@@ -179,6 +194,88 @@ def register(mcp: FastMCP) -> None:
                 return f"Failed to link callouts:\n" + "\n".join(f"- {e}" for e in errors)
 
             return f"Unexpected response: {result}"
+
+        except Exception as e:
+            return handle_api_error(e)
+
+    @mcp.tool(
+        name="direct_update_adextensions",
+        annotations={
+            "title": "Update Callout Extensions",
+            "readOnlyHint": False,
+            "destructiveHint": False,
+            "idempotentHint": False,
+            "openWorldHint": False
+        }
+    )
+    async def direct_update_adextensions(params: UpdateCalloutInput) -> str:
+        """Update existing callout extensions (уточнения).
+
+        Updates the text of an existing callout. Max 25 characters.
+        The callout will need re-moderation if text changed.
+        """
+        try:
+            extensions = [{
+                "Id": params.extension_id,
+                "Callout": {"CalloutText": params.callout_text}
+            }]
+
+            request_params = {"AdExtensions": extensions}
+
+            result = await api_client.direct_request("adextensions", "update", request_params)
+            update_results = result.get("result", {}).get("UpdateResults", [])
+
+            if update_results and update_results[0].get("Id"):
+                return f"Callout {params.extension_id} updated successfully. Text: {params.callout_text}"
+
+            errors = []
+            for r in update_results:
+                if r.get("Errors"):
+                    errors.extend([f"{e.get('Code')}: {e.get('Message')}" for e in r["Errors"]])
+
+            if errors:
+                return f"Failed to update callout:\n" + "\n".join(f"- {e}" for e in errors)
+
+            return f"Unexpected response: {result}"
+
+        except Exception as e:
+            return handle_api_error(e)
+
+    @mcp.tool(
+        name="direct_delete_adextensions",
+        annotations={
+            "title": "Delete Ad Extensions",
+            "readOnlyHint": False,
+            "destructiveHint": True,
+            "idempotentHint": False,
+            "openWorldHint": False
+        }
+    )
+    async def direct_delete_adextensions(params: DeleteAdExtensionsInput) -> str:
+        """Delete ad extensions (callouts/уточнения).
+
+        WARNING: Deleted extensions will be removed from all ads using them.
+        This action cannot be undone.
+        """
+        try:
+            request_params = {
+                "SelectionCriteria": {"Ids": params.extension_ids}
+            }
+
+            result = await api_client.direct_request("adextensions", "delete", request_params)
+            delete_results = result.get("result", {}).get("DeleteResults", [])
+
+            success = [r["Id"] for r in delete_results if r.get("Id") and not r.get("Errors")]
+            errors = []
+            for r in delete_results:
+                if r.get("Errors"):
+                    errors.extend([f"ID {r.get('Id', '?')}: {e.get('Message', 'Unknown error')}" for e in r["Errors"]])
+
+            response = f"Successfully deleted {len(success)} extension(s)."
+            if errors:
+                response += f"\n\nErrors:\n" + "\n".join(f"- {e}" for e in errors)
+
+            return response
 
         except Exception as e:
             return handle_api_error(e)

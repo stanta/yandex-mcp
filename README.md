@@ -6,24 +6,29 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io/)
 
-MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, and **Yandex Wordstat** APIs. Provides **128 tools** for managing advertising campaigns, analytics, keyword research, and reporting through any MCP-compatible client.
+MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, and **Yandex Wordstat** APIs. Provides **170 tools** for managing advertising campaigns, analytics, keyword research, and reporting through any MCP-compatible client.
 
 > Manage Yandex advertising and analytics through AI
 
 ## Features
 
-### Yandex Direct API v5 (80 tools)
+### Yandex Direct API v5 (113 tools)
 - **Campaigns** — create, update, pause, resume, archive, delete
-- **Ad Groups** — create, update with targeting settings
+- **Ad Groups** — create, update, pause, resume, archive, unarchive with targeting settings
 - **Ads** — text, image, dynamic, shopping ads with moderation
 - **Keywords** — manage keywords and bids
 - **Statistics** — detailed performance reports with async retry
-- **Bid Modifiers** — mobile, desktop, demographics, regional adjustments
+- **Bid Modifiers** — mobile, desktop, demographics, regional, video, and retargeting adjustments
 - **Retargeting** — retargeting lists and audience targets
 - **Smart Ad Targets** — feed-based targeting filters
+- **Dynamic Text Ad Targets** — autotargeting for dynamic text ads
 - **Sitelinks, VCards, Callouts** — ad extensions
 - **Images** — upload, manage, and delete ad images
 - **Feeds** — product feed management
+- **Lead Forms** — lead generation form management
+- **Agency Clients** — agency sub-account management
+- **TurboPages** — fast-loading mobile landing pages
+- **VideoAds** — video ad campaigns (videos, groups, ads)
 - **Videos & Creatives** — video ad creation
 - **Dictionaries** — regions, interests, categories
 - **Negative Keywords** — shared negative keyword sets
@@ -75,7 +80,24 @@ Add to your MCP client settings:
 ```json
 {
   "mcpServers": {
-    "yandex": {
+    "advertising_yandex_direct": {
+      "command": "/path/to/yandex-mcp/.venv/bin/python",
+      "args": ["server.py"],
+      "cwd": "/path/to/yandex-mcp",
+      "env": {
+        "YANDEX_TOKEN": "your_token"
+      }
+    }
+  }
+}
+```
+
+If you prefer a global Python interpreter instead of a project virtualenv:
+
+```json
+{
+  "mcpServers": {
+    "advertising_yandex_direct": {
       "command": "python",
       "args": ["-m", "yandex_mcp"],
       "cwd": "/path/to/yandex-mcp",
@@ -95,6 +117,71 @@ Add to your MCP client settings:
 > What are the site stats for the last week?
 ```
 
+## Authentication Methods
+
+The Yandex MCP Server supports two authentication methods:
+
+### Method 1: Static Token (Simple)
+
+Use a pre-generated OAuth token directly in your environment variables. This is the quickest way to get started:
+
+```env
+YANDEX_TOKEN=your_oauth_token_here
+```
+
+Get a token from [Yandex OAuth](https://oauth.yandex.ru/) with permissions for Direct and Metrika APIs (`direct:api`, `metrika:read`, `metrika:write`).
+
+### Method 2: OAuth Authorization Code Flow (Recommended for Apps)
+
+For applications that need to manage tokens programmatically, use the OAuth flow with client credentials. This provides automatic token refresh and better security:
+
+```env
+YANDEX_CLIENT_ID=your_client_id
+YANDEX_CLIENT_SECRET=your_client_secret
+```
+
+#### Creating a Yandex OAuth Application
+
+1. Go to [https://oauth.yandex.ru/](https://oauth.yandex.ru/)
+2. Click "Register new application"
+3. Fill in the application details:
+   - **Name**: Yandex MCP Server
+   - **Description**: MCP server for Yandex Direct and Metrika
+   - **Platforms**: Select "Web" or "Desktop" depending on your use case
+4. Under "Permissions", select:
+   - `direct:api` — Yandex Direct API access
+   - `metrika:read` — Read access to Metrika statistics
+   - `metrika:write` — Write access to Metrika (if needed)
+5. Save the application
+6. Copy the **Client ID** and **Client Secret** to your `.env` file
+
+#### Using OAuth with MCP Tools
+
+Once configured with `YANDEX_CLIENT_ID` and `YDEX_CLIENT_SECRET`, use these tools to authenticate:
+
+**Web Authorization Flow:**
+```
+1. Call oauth_get_authorization_url to get the authorization URL
+2. Open the URL in a browser and grant access
+3. Copy the verification code from the redirect URL
+4. Call oauth_exchange_code with the code to get tokens
+```
+
+**Device Flow (for headless environments):**
+```
+1. Call oauth_get_device_code to get a device code
+2. Display the user_code and verification_url to the user
+3. Call oauth_poll_device_token to poll for the token
+4. Tokens will be automatically stored and refreshed
+```
+
+**Token Management:**
+- `oauth_check_token_status` — Check current token validity and expiration
+- `oauth_refresh_token` — Manually refresh an expired token
+- `oauth_revoke_token` — Remove stored tokens
+
+Tokens are securely stored in a local file and automatically refreshed when expired.
+
 ## Environment Variables
 
 | Variable | Required | Description |
@@ -104,16 +191,22 @@ Add to your MCP client settings:
 | `YANDEX_METRIKA_TOKEN` | No | Separate token for Metrika API |
 | `YANDEX_CLIENT_LOGIN` | No | Client login for agency accounts |
 | `YANDEX_USE_SANDBOX` | No | Set to `true` for sandbox API |
+| `YANDEX_CLIENT_ID` | No* | OAuth application ID (required for OAuth flow) |
+| `YANDEX_CLIENT_SECRET` | No* | OAuth application secret (required for OAuth flow) |
+| `YANDEX_OAUTH_REDIRECT_URI` | No | Redirect URI (default: https://oauth.yandex.com/verification_code) |
+| `YANDEX_OAUTH_SCOPES` | No | Comma-separated scopes (default: direct:api,metrika:read,metrika:write) |
 
-## Tools (128)
+*Either `YANDEX_TOKEN` or (`YANDEX_CLIENT_ID` + `YANDEX_CLIENT_SECRET`) is required.
 
-### Yandex Direct (80 tools)
+## Tools (170)
+
+### Yandex Direct (115 tools)
 
 #### Campaigns (8)
 
 | Tool | Description |
 |------|-------------|
-| `direct_get_campaigns` | Get campaigns with status, strategy, and budget info |
+| `direct_get_campaigns` | Get campaigns with status, strategy, budget, wallet, notifications, and timezone info |
 | `direct_create_campaign` | Create a new campaign (search, network, or both) |
 | `direct_update_campaign` | Update campaign settings (strategy, budget, schedule, regions) |
 | `direct_suspend_campaigns` | Pause campaigns |
@@ -122,13 +215,26 @@ Add to your MCP client settings:
 | `direct_unarchive_campaigns` | Restore archived campaigns |
 | `direct_delete_campaigns` | Delete campaigns permanently |
 
-#### Ad Groups (3)
+**Supported Bidding Strategies:**
+- `WB_MAXIMUM_CLICKS` — Maximize clicks within budget
+- `AVERAGE_CPC` — Average CPC strategy
+- `AVERAGE_CPA` — Target average CPA (requires goal_id)
+- `AVERAGE_ROI` — Target ROI with ROI coefficient (requires goal_id)
+- `WB_MAXIMUM_CONVERSION_RATE` — Maximize conversion rate
+- `PAY_FOR_CONVERSION` — Pay per conversion (requires goal_id)
+- `PAY_FOR_CONVERSION_CRR` — Pay per conversion with CRR limit (requires goal_id)
+
+#### Ad Groups (7)
 
 | Tool | Description |
 |------|-------------|
 | `direct_get_adgroups` | Get ad groups with targeting settings |
 | `direct_create_adgroup` | Create a new ad group in a campaign |
 | `direct_update_adgroup` | Update ad group settings and targeting |
+| `direct_suspend_adgroups` | Pause ad groups |
+| `direct_resume_adgroups` | Resume paused ad groups |
+| `direct_archive_adgroups` | Archive ad groups |
+| `direct_unarchive_adgroups` | Restore archived ad groups |
 
 #### Ads (12)
 
@@ -147,7 +253,7 @@ Add to your MCP client settings:
 | `direct_unarchive_ads` | Restore archived ads |
 | `direct_delete_ads` | Delete ads permanently |
 
-#### Keywords (6)
+#### Keywords (8)
 
 | Tool | Description |
 |------|-------------|
@@ -156,6 +262,8 @@ Add to your MCP client settings:
 | `direct_set_keyword_bids` | Set search and network bids |
 | `direct_suspend_keywords` | Pause keywords |
 | `direct_resume_keywords` | Resume paused keywords |
+| `direct_archive_keywords` | Archive keywords |
+| `direct_unarchive_keywords` | Restore archived keywords |
 | `direct_delete_keywords` | Delete keywords permanently |
 
 #### Statistics (1)
@@ -168,8 +276,8 @@ Add to your MCP client settings:
 
 | Tool | Description |
 |------|-------------|
-| `direct_get_bid_modifiers` | Get bid modifiers (mobile, desktop, demographics, regional) |
-| `direct_add_bid_modifier` | Add a bid modifier to campaign or ad group |
+| `direct_get_bid_modifiers` | Get bid modifiers (mobile, desktop, demographics, regional, video, retargeting) |
+| `direct_add_bid_modifier` | Add a bid modifier (mobile, desktop, demographics, regional, video, or retargeting) |
 | `direct_set_bid_modifier` | Set bid modifier value (0-1300%) |
 | `direct_delete_bid_modifiers` | Delete bid modifiers |
 | `direct_toggle_bid_modifiers` | Enable or disable bid modifiers |
@@ -198,6 +306,17 @@ Add to your MCP client settings:
 | `direct_resume_smart_ad_targets` | Resume smart ad targets |
 | `direct_delete_smart_ad_targets` | Delete smart ad targets |
 
+#### Dynamic Text Ad Targets (6)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_dynamic_text_ad_targets` | Get dynamic text ad target filters and conditions |
+| `direct_add_dynamic_text_ad_target` | Add an autotargeting filter to a dynamic text ad group |
+| `direct_update_dynamic_text_ad_target` | Update dynamic text ad target settings |
+| `direct_suspend_dynamic_text_ad_targets` | Pause dynamic text ad targets |
+| `direct_resume_dynamic_text_ad_targets` | Resume dynamic text ad targets |
+| `direct_delete_dynamic_text_ad_targets` | Delete dynamic text ad targets |
+
 #### Sitelinks (3)
 
 | Tool | Description |
@@ -223,22 +342,32 @@ Add to your MCP client settings:
 | `direct_update_negative_keyword_shared_set` | Update a negative keyword set |
 | `direct_delete_negative_keyword_shared_sets` | Delete negative keyword sets |
 
-#### Ad Extensions (3)
+#### Ad Extensions (5)
 
 | Tool | Description |
 |------|-------------|
 | `direct_get_adextensions` | Get ad extensions (callouts, etc.) |
 | `direct_add_callouts` | Add callout extensions |
+| `direct_update_adextensions` | Update callout extensions |
+| `direct_delete_adextensions` | Delete ad extensions |
 | `direct_link_callouts_to_ad` | Link callouts to an ad |
 
-#### Videos & Creatives (4)
+#### Videos & Creatives (7)
 
 | Tool | Description |
 |------|-------------|
 | `direct_upload_video` | Upload a video for ad extensions |
 | `direct_get_advideos` | Get uploaded ad videos |
-| `direct_create_video_creative` | Create a video creative from uploaded video |
+| `direct_delete_advideos` | Delete ad videos permanently |
+| `direct_create_video_creative` | Create a VIDEO_EXTENSION_CREATIVE from uploaded video |
+| `direct_create_cpc_video_creative` | Create a CPC_VIDEO_CREATIVE (for search campaigns) |
+| `direct_create_cpm_video_creative` | Create a CPM_VIDEO_CREATIVE (for display campaigns) |
 | `direct_get_creatives` | Get video creatives |
+
+**Creative Types:**
+- `VIDEO_EXTENSION_CREATIVE` — Video extension ads
+- `CPC_VIDEO_CREATIVE` — Video ads for search campaigns
+- `CPM_VIDEO_CREATIVE` — Video ads for display campaigns
 
 #### Feeds (4)
 
@@ -249,12 +378,13 @@ Add to your MCP client settings:
 | `direct_update_feed` | Update feed settings |
 | `direct_delete_feeds` | Delete feeds |
 
-#### Images (3)
+#### Images (4)
 
 | Tool | Description |
 |------|-------------|
 | `direct_upload_image` | Upload a base64-encoded image (JPEG, GIF, PNG) |
 | `direct_get_images` | Get image metadata, hashes, and association status |
+| `direct_update_image` | Update image properties (name) |
 | `direct_delete_images` | Delete unassociated images by hash |
 
 #### Dictionaries & Regions (3)
@@ -273,6 +403,45 @@ Add to your MCP client settings:
 | `direct_check_campaign_changes` | Check for changes in specific campaigns |
 | `direct_check_all_changes` | Check for any changes in the account |
 | `direct_get_recent_changes_timestamp` | Get timestamp of most recent changes |
+
+#### Lead Forms (5)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_lead_forms` | Get lead forms with filtering by campaign/ad group |
+| `direct_add_lead_form` | Create a new lead form with custom questions |
+| `direct_update_lead_form` | Update lead form settings |
+| `direct_delete_lead_forms` | Delete lead forms permanently |
+| `direct_get_lead_form_leads` | Get submissions/leads from lead forms |
+
+#### Agency Clients (2)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_agency_clients` | Get list of agency client accounts with status and permissions |
+| `direct_update_agency_client` | Update client account settings and notifications |
+
+#### TurboPages (5)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_turbo_pages` | Get list of Turbo pages with status and settings |
+| `direct_add_turbo_page` | Create a new Turbo page from a website URL |
+| `direct_update_turbo_page` | Update Turbo page name and URL |
+| `direct_delete_turbo_pages` | Delete Turbo pages permanently |
+| `direct_get_turbo_page_templates` | Get available Turbo page templates |
+
+#### VideoAds (7)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_video_ad_videos` | Get video ad videos with status and metadata |
+| `direct_add_video_ad_videos` | Add video ad videos from URLs |
+| `direct_get_video_ad_groups` | Get video ad groups with targeting settings |
+| `direct_add_video_ad_groups` | Add video ad groups to campaigns |
+| `direct_update_video_ad_groups` | Update video ad group settings |
+| `direct_get_video_ads` | Get video ads with content and status |
+| `direct_add_video_ads` | Add video ads to video ad groups |
 
 ### Yandex Metrika (43 tools)
 
@@ -379,6 +548,18 @@ Add to your MCP client settings:
 | `wordstat_regions_tree` | Get full hierarchical regions tree with IDs |
 | `wordstat_user_info` | Get API quota and usage limits |
 
+### OAuth Authentication (7 tools)
+
+| Tool | Description |
+|------|-------------|
+| `oauth_get_authorization_url` | Get authorization URL for web-based OAuth flow |
+| `oauth_exchange_code` | Exchange authorization code for access token |
+| `oauth_get_device_code` | Get device code for headless authentication |
+| `oauth_poll_device_token` | Poll for device token (for headless devices) |
+| `oauth_check_token_status` | Check token status and expiration |
+| `oauth_refresh_token` | Manually refresh expired token |
+| `oauth_revoke_token` | Remove stored token and revoke access |
+
 ## Usage Examples
 
 ### Campaign management
@@ -441,6 +622,8 @@ yandex_mcp/
 ├── __init__.py          # MCP server init and tool registration
 ├── client.py            # Async HTTP client for Direct, Metrika & Wordstat APIs
 ├── config.py            # Configuration and environment variables
+├── oauth.py             # OAuth client with authorization code and device flows
+├── token_storage.py     # Secure file-based token storage
 ├── utils.py             # Error handling utilities
 ├── models/              # Pydantic input models
 │   ├── common.py
@@ -454,7 +637,8 @@ yandex_mcp/
 │   ├── metrika.py
 │   └── wordstat.py
 └── tools/               # MCP tool definitions
-    ├── direct/          # 80 Yandex Direct tools
+    ├── oauth.py         # OAuth authentication tools
+    ├── direct/          # 105 Yandex Direct tools
     │   ├── _helpers.py  # Shared manage-operation factory
     │   ├── campaigns.py
     │   ├── adgroups.py
@@ -462,6 +646,10 @@ yandex_mcp/
     │   ├── keywords.py
     │   ├── stats.py
     │   ├── images.py
+    │   ├── lead_forms.py
+    │   ├── agency_clients.py
+    │   ├── turbo_pages.py
+    │   ├── video_ads.py
     │   └── ...
     ├── metrika/         # 43 Yandex Metrika tools
     │   ├── counters.py

@@ -184,6 +184,18 @@ class RegionalAdjustment(BaseModel):
     bid_modifier: int = Field(..., ge=10, le=1300, description="Bid modifier percent (10-1300)")
 
 
+class VideoAdjustment(BaseModel):
+    """Video bid adjustment for video ad campaigns."""
+    bid_modifier: int = Field(..., ge=0, le=1300, description="Bid modifier percent (0-1300, 100=no change)")
+
+
+class RetargetingAdjustment(BaseModel):
+    """Retargeting list bid adjustment."""
+    retargeting_list_id: int = Field(..., description="Retargeting list ID")
+    bid_modifier: int = Field(..., ge=0, le=1300, description="Bid modifier percent (0-1300)")
+    enabled: bool = Field(default=True, description="Whether the adjustment is enabled")
+
+
 class AddBidModifierInput(BaseModel):
     """Input for adding bid modifiers."""
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
@@ -195,6 +207,8 @@ class AddBidModifierInput(BaseModel):
     desktop_adjustment: Optional[DesktopAdjustment] = Field(default=None, description="Desktop adjustment")
     demographics_adjustments: Optional[List[DemographicsAdjustment]] = Field(default=None, description="Demographics adjustments")
     regional_adjustments: Optional[List[RegionalAdjustment]] = Field(default=None, description="Regional adjustments")
+    video_adjustment: Optional[VideoAdjustment] = Field(default=None, description="Video ad campaign adjustment")
+    retargeting_adjustments: Optional[List[RetargetingAdjustment]] = Field(default=None, description="Retargeting list adjustments")
 
 
 class SetBidModifierInput(BaseModel):
@@ -447,3 +461,495 @@ class DeleteImagesInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     ad_image_hashes: List[str] = Field(..., min_length=1, description="Image hashes to delete")
+
+
+class UpdateImageInput(BaseModel):
+    """Input for updating a single ad image."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    ad_image_hash: str = Field(..., description="Image hash to update")
+    name: Optional[str] = Field(default=None, max_length=255, description="New image name")
+
+
+class UpdateImagesInput(BaseModel):
+    """Input for updating ad images."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    images: List[UpdateImageInput] = Field(..., min_length=1, max_length=100, description="Images to update")
+
+
+# =============================================================================
+# DynamicTextAdTargets Models
+# =============================================================================
+
+class DynamicTextAdTargetCondition(BaseModel):
+    """A single filter condition for dynamic text ad targeting."""
+    operand: str = Field(..., description="Feed field name (e.g., 'price', 'manufacturer', 'category_id', 'url', 'title')")
+    operator: str = Field(..., description="Operator: EQUALS_ANY, CONTAINS_ANY, NOT_CONTAINS_ALL, GREATER_THAN, LESS_THAN, IN_RANGE, EXISTS")
+    arguments: List[str] = Field(..., description="Values to match (max 50). For IN_RANGE use 'min-max' format.")
+
+
+class GetDynamicTextAdTargetsInput(BaseModel):
+    """Input for getting dynamic text ad targets."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    campaign_ids: Optional[List[int]] = Field(default=None, description="Filter by campaign IDs")
+    adgroup_ids: Optional[List[int]] = Field(default=None, description="Filter by ad group IDs")
+    target_ids: Optional[List[int]] = Field(default=None, description="Filter by target IDs")
+    limit: int = Field(default=100, ge=1, le=10000)
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+class AddDynamicTextAdTargetInput(BaseModel):
+    """Input for adding a dynamic text ad target."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    adgroup_id: int = Field(..., description="Ad group ID (dynamic text ad group)")
+    name: str = Field(..., max_length=255, description="Target name")
+    auto_budget: bool = Field(default=True, description="Use campaign budget (YES) or set manual bid (NO)")
+    bid: Optional[float] = Field(default=None, gt=0, description="Manual bid (if auto_budget is NO)")
+    conditions: Optional[List[DynamicTextAdTargetCondition]] = Field(
+        default=None,
+        description="Filter conditions. If empty, all feed items are used."
+    )
+
+
+class UpdateDynamicTextAdTargetInput(BaseModel):
+    """Input for updating a dynamic text ad target."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    target_id: int = Field(..., description="Dynamic text ad target ID")
+    name: Optional[str] = Field(default=None, max_length=255, description="New name")
+    auto_budget: Optional[bool] = Field(default=None, description="Use campaign budget (YES) or set manual bid (NO)")
+    bid: Optional[float] = Field(default=None, gt=0, description="Manual bid (if auto_budget is NO)")
+    conditions: Optional[List[DynamicTextAdTargetCondition]] = Field(default=None, description="New conditions")
+
+
+class ManageDynamicTextAdTargetsInput(BaseModel):
+    """Input for managing dynamic text ad targets (suspend/resume/delete)."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    target_ids: List[int] = Field(..., min_length=1, description="Dynamic text ad target IDs")
+
+
+class DeleteDynamicTextAdTargetsInput(BaseModel):
+    """Input for deleting dynamic text ad targets."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    target_ids: List[int] = Field(..., min_length=1, description="Dynamic text ad target IDs to delete")
+
+
+# =============================================================================
+# LeadForms Models
+# =============================================================================
+
+class QuestionType(str, Enum):
+    """Lead form question types."""
+    NAME = "NAME"
+    PHONE = "PHONE"
+    EMAIL = "EMAIL"
+    ADDRESS = "ADDRESS"
+    COMMENT = "COMMENT"
+    CHECKBOX = "CHECKBOX"
+
+
+class LeadFormQuestion(BaseModel):
+    """A single question in the lead form."""
+    type: QuestionType = Field(..., description="Question type: NAME, PHONE, EMAIL, ADDRESS, COMMENT, CHECKBOX")
+    required: bool = Field(default=False, description="Whether this question is required")
+    label: Optional[str] = Field(default=None, max_length=255, description="Custom label for the question")
+
+
+class GetLeadFormsInput(BaseModel):
+    """Input for getting lead forms."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    campaign_ids: Optional[List[int]] = Field(default=None, description="Filter by campaign IDs")
+    adgroup_ids: Optional[List[int]] = Field(default=None, description="Filter by ad group IDs")
+    form_ids: Optional[List[int]] = Field(default=None, description="Filter by form IDs")
+    limit: int = Field(default=100, ge=1, le=10000, description="Maximum forms to return")
+    offset: int = Field(default=0, ge=0, description="Offset for pagination")
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+class AddLeadFormInput(BaseModel):
+    """Input for adding a lead form."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    name: str = Field(..., max_length=255, description="Lead form name")
+    campaign_id: int = Field(..., description="Campaign ID")
+    url: str = Field(..., max_length=1024, description="Landing page URL where form is placed")
+    policy_url: str = Field(..., max_length=1024, description="Privacy policy URL")
+    short_form: bool = Field(default=False, description="Use short form (only name + phone)")
+    questions: Optional[List[LeadFormQuestion]] = Field(
+        default=None,
+        description="Form questions. If not specified, default questions will be used."
+    )
+
+
+class UpdateLeadFormInput(BaseModel):
+    """Input for updating a lead form."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    form_id: int = Field(..., description="Lead form ID to update")
+    name: Optional[str] = Field(default=None, max_length=255, description="New form name")
+    url: Optional[str] = Field(default=None, max_length=1024, description="New landing page URL")
+    policy_url: Optional[str] = Field(default=None, max_length=1024, description="New privacy policy URL")
+    short_form: Optional[bool] = Field(default=None, description="Use short form")
+    questions: Optional[List[LeadFormQuestion]] = Field(default=None, description="New questions")
+
+
+class DeleteLeadFormsInput(BaseModel):
+    """Input for deleting lead forms."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    form_ids: List[int] = Field(..., min_length=1, description="Lead form IDs to delete")
+
+
+class GetLeadFormLeadsInput(BaseModel):
+    """Input for getting leads from lead forms."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    form_ids: Optional[List[int]] = Field(default=None, description="Filter by form IDs")
+    limit: int = Field(default=100, ge=1, le=10000, description="Maximum leads to return")
+    offset: int = Field(default=0, ge=0, description="Offset for pagination")
+    response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+# =============================================================================
+# AgencyClients Models
+# =============================================================================
+
+class GetAgencyClientsInput(BaseModel):
+    """Input for getting agency client accounts."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    logins: Optional[List[str]] = Field(
+        default=None,
+        description="Filter by client logins (usernames)"
+    )
+    status: Optional[List[str]] = Field(
+        default=None,
+        description="Filter by status: ALLOWED, SUSPENDED, BLOCKED, NONE"
+    )
+    limit: int = Field(
+        default=100,
+        ge=1,
+        le=10000,
+        description="Maximum number of clients to return"
+    )
+    offset: int = Field(
+        default=0,
+        ge=0,
+        description="Offset for pagination"
+    )
+    response_format: ResponseFormat = Field(
+        default=ResponseFormat.MARKDOWN,
+        description="Output format: 'markdown' or 'json'"
+    )
+
+
+class AgencyClientSettings(BaseModel):
+    """Settings for agency client."""
+    send_account_warnings: Optional[bool] = Field(
+        default=None,
+        description="Send account warnings to client"
+    )
+    send_notification_about_warnings: Optional[bool] = Field(
+        default=None,
+        description="Send notification about warnings"
+    )
+
+
+class AgencyClientNotification(BaseModel):
+    """Notification settings for agency client."""
+    email: Optional[str] = Field(
+        default=None,
+        description="Email for notifications"
+    )
+    email_balance: Optional[bool] = Field(
+        default=None,
+        description="Send balance notifications"
+    )
+    email_trade_offers: Optional[bool] = Field(
+        default=None,
+        description="Send trade offers notifications"
+    )
+    email_advertising_on_account: Optional[bool] = Field(
+        default=None,
+        description="Send advertising on account notifications"
+    )
+
+
+class UpdateAgencyClientInput(BaseModel):
+    """Input for updating an agency client."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    login: str = Field(
+        ...,
+        description="Client login (username) to update"
+    )
+    settings: Optional[AgencyClientSettings] = Field(
+        default=None,
+        description="Client settings"
+    )
+    notification: Optional[AgencyClientNotification] = Field(
+        default=None,
+        description="Notification settings"
+    )
+
+
+# =============================================================================
+# TurboPages Models
+# =============================================================================
+
+class TurboPageInput(BaseModel):
+    """Input model for creating or updating a Turbo page."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    name: str = Field(..., max_length=255, description="Turbo page name")
+    url: str = Field(..., max_length=1024, description="Original website URL for Turbo page")
+    turbo_site_id: Optional[int] = Field(default=None, description="Turbo site ID (required for creating)")
+    turbo_page_ids: Optional[List[int]] = Field(
+        default=None,
+        description="Turbo page IDs for update/delete operations"
+    )
+
+
+class GetTurboPagesInput(BaseModel):
+    """Input for getting Turbo pages."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    turbo_page_ids: Optional[List[int]] = Field(
+        default=None,
+        description="Filter by specific Turbo page IDs"
+    )
+    limit: int = Field(
+        default=100,
+        ge=1,
+        le=10000,
+        description="Maximum number of Turbo pages to return"
+    )
+    offset: int = Field(
+        default=0,
+        ge=0,
+        description="Offset for pagination"
+    )
+    response_format: ResponseFormat = Field(
+        default=ResponseFormat.MARKDOWN,
+        description="Output format: 'markdown' or 'json'"
+    )
+
+
+class DeleteTurboPagesInput(BaseModel):
+    """Input for deleting Turbo pages."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    turbo_page_ids: List[int] = Field(
+        ...,
+        min_length=1,
+        description="Turbo page IDs to delete"
+    )
+
+
+# =============================================================================
+# VideoAds Models
+# =============================================================================
+
+class GetVideoAdVideosInput(BaseModel):
+    """Input for getting video ad videos."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    video_ad_video_ids: Optional[List[int]] = Field(
+        default=None,
+        description="Filter by specific video ad video IDs"
+    )
+    campaign_ids: Optional[List[int]] = Field(
+        default=None,
+        description="Filter by campaign IDs"
+    )
+    limit: int = Field(
+        default=100,
+        ge=1,
+        le=10000,
+        description="Maximum number of videos to return"
+    )
+    offset: int = Field(
+        default=0,
+        ge=0,
+        description="Offset for pagination"
+    )
+    response_format: ResponseFormat = Field(
+        default=ResponseFormat.MARKDOWN,
+        description="Output format: 'markdown' or 'json'"
+    )
+
+
+class VideoAdVideoInput(BaseModel):
+    """Input model for creating a video ad video."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    name: str = Field(..., max_length=255, description="Video ad video name")
+    video_url: str = Field(..., max_length=1024, description="URL of the video file")
+
+
+class AddVideoAdVideosInput(BaseModel):
+    """Input for adding video ad videos."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    videos: List[VideoAdVideoInput] = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="List of video ad videos to add"
+    )
+
+
+class GetVideoAdGroupsInput(BaseModel):
+    """Input for getting video ad groups."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    video_ad_group_ids: Optional[List[int]] = Field(
+        default=None,
+        description="Filter by specific video ad group IDs"
+    )
+    campaign_ids: Optional[List[int]] = Field(
+        default=None,
+        description="Filter by campaign IDs"
+    )
+    limit: int = Field(
+        default=100,
+        ge=1,
+        le=10000,
+        description="Maximum number of ad groups to return"
+    )
+    offset: int = Field(
+        default=0,
+        ge=0,
+        description="Offset for pagination"
+    )
+    response_format: ResponseFormat = Field(
+        default=ResponseFormat.MARKDOWN,
+        description="Output format: 'markdown' or 'json'"
+    )
+
+
+class VideoAdGroupInput(BaseModel):
+    """Input model for creating or updating a video ad group."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    campaign_id: int = Field(..., description="Campaign ID")
+    name: str = Field(..., max_length=255, description="Video ad group name")
+    region_ids: Optional[List[int]] = Field(
+        default=None,
+        description="Region IDs for targeting"
+    )
+
+
+class AddVideoAdGroupsInput(BaseModel):
+    """Input for adding video ad groups."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    ad_groups: List[VideoAdGroupInput] = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="List of video ad groups to add"
+    )
+
+
+class UpdateVideoAdGroupInput(BaseModel):
+    """Input model for updating a video ad group."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    video_ad_group_id: int = Field(..., description="Video ad group ID to update")
+    name: Optional[str] = Field(
+        default=None,
+        max_length=255,
+        description="New video ad group name"
+    )
+    region_ids: Optional[List[int]] = Field(
+        default=None,
+        description="New region IDs for targeting"
+    )
+
+
+class UpdateVideoAdGroupsInput(BaseModel):
+    """Input for updating video ad groups."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    ad_groups: List[UpdateVideoAdGroupInput] = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="List of video ad groups to update"
+    )
+
+
+class GetVideoAdsInput(BaseModel):
+    """Input for getting video ads."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    video_ad_ids: Optional[List[int]] = Field(
+        default=None,
+        description="Filter by specific video ad IDs"
+    )
+    campaign_ids: Optional[List[int]] = Field(
+        default=None,
+        description="Filter by campaign IDs"
+    )
+    ad_group_ids: Optional[List[int]] = Field(
+        default=None,
+        description="Filter by ad group IDs"
+    )
+    limit: int = Field(
+        default=100,
+        ge=1,
+        le=10000,
+        description="Maximum number of ads to return"
+    )
+    offset: int = Field(
+        default=0,
+        ge=0,
+        description="Offset for pagination"
+    )
+    response_format: ResponseFormat = Field(
+        default=ResponseFormat.MARKDOWN,
+        description="Output format: 'markdown' or 'json'"
+    )
+
+
+class VideoAdInput(BaseModel):
+    """Input model for creating a video ad."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    video_ad_group_id: int = Field(..., description="Video ad group ID")
+    video_ad_video_id: int = Field(..., description="Video ad video ID")
+    title: str = Field(..., max_length=50, description="Ad title")
+    link_url: str = Field(..., max_length=1024, description="Click-through URL")
+    display_url: Optional[str] = Field(
+        default=None,
+        max_length=255,
+        description="Display URL"
+    )
+    vcard_id: Optional[int] = Field(
+        default=None,
+        description="vCard ID for contact info"
+    )
+    href_param: Optional[str] = Field(
+        default=None,
+        max_length=255,
+        description="HREF parameter for tracking"
+    )
+
+
+class AddVideoAdsInput(BaseModel):
+    """Input for adding video ads."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    ads: List[VideoAdInput] = Field(
+        ...,
+        min_length=1,
+        max_length=50,
+        description="List of video ads to add"
+    )

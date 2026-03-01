@@ -34,6 +34,13 @@ class GetAdVideosInput(BaseModel):
     limit: int = Field(default=100, ge=1, le=10000)
 
 
+class DeleteAdVideosInput(BaseModel):
+    """Input for deleting ad videos."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    video_ids: List[str] = Field(..., min_length=1, description="List of video IDs to delete")
+
+
 def register(mcp: FastMCP) -> None:
     """Register ad video tools."""
 
@@ -141,6 +148,60 @@ def register(mcp: FastMCP) -> None:
                 lines.append(f"| {v.get('Id')} | {v.get('Status')} |")
 
             return "\n".join(lines)
+
+        except Exception as e:
+            return handle_api_error(e)
+
+    @mcp.tool(
+        name="direct_delete_advideos",
+        annotations={
+            "title": "Delete Ad Videos",
+            "readOnlyHint": False,
+            "destructiveHint": True,
+            "idempotentHint": False,
+            "openWorldHint": False
+        }
+    )
+    async def direct_delete_advideos(params: DeleteAdVideosInput) -> str:
+        """Delete ad videos by their IDs. WARNING: Irreversible.
+
+        Videos that are used in creatives cannot be deleted.
+        Use direct_get_advideos to find videos first.
+        """
+        try:
+            request_params = {
+                "SelectionCriteria": {
+                    "Ids": params.video_ids
+                }
+            }
+
+            result = await api_client.direct_request("advideos", "delete", request_params)
+
+            if "error" in result:
+                err = result["error"]
+                return f"API Error: {err.get('error_code')}: {err.get('error_string')} | {err.get('error_detail', '')}"
+
+            delete_results = result.get("result", {}).get("DeleteResults", [])
+
+            success = [
+                r["Id"] for r in delete_results
+                if r.get("Id") and not r.get("Errors")
+            ]
+            errors = []
+            for r in delete_results:
+                if r.get("Errors"):
+                    errors.extend([
+                        f"Video {r.get('Id', '?')}: {e.get('Message')}"
+                        for e in r["Errors"]
+                    ])
+
+            response = f"Successfully deleted {len(success)} video(s)."
+            if success:
+                response += "\nDeleted video IDs: " + ", ".join(success)
+            if errors:
+                response += f"\n\nErrors:\n" + "\n".join(f"- {e}" for e in errors)
+
+            return response
 
         except Exception as e:
             return handle_api_error(e)

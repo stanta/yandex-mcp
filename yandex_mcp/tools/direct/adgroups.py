@@ -9,9 +9,11 @@ from ...models.direct import (
     GetAdGroupsInput,
     CreateAdGroupInput,
     UpdateAdGroupInput,
+    ManageAdGroupInput,
 )
 from ...formatters.direct import format_adgroups_markdown
 from ...utils import handle_api_error
+from ._helpers import register_manage_tool
 
 
 def register(mcp: FastMCP) -> None:
@@ -59,6 +61,16 @@ def register(mcp: FastMCP) -> None:
 
         except Exception as e:
             return handle_api_error(e)
+
+    for action in ("suspend", "resume", "archive", "unarchive"):
+        register_manage_tool(
+            mcp,
+            service="adgroups",
+            action=action,
+            entity="adgroup",
+            input_model=ManageAdGroupInput,
+            ids_field="adgroup_ids",
+        )
 
     @mcp.tool(
         name="direct_create_adgroup",

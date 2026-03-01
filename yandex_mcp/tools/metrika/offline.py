@@ -72,7 +72,7 @@ def register(mcp: FastMCP) -> None:
                 f"management/v1/counter/{params.counter_id}/offline_conversions/upload",
                 method="POST",
                 params={"client_id_type": params.client_id_type},
-                json_data={"conversions": conversions_data}
+                data={"conversions": conversions_data}
             )
 
             uploading_id = result.get("uploading", {}).get("id")
@@ -184,7 +184,7 @@ def register(mcp: FastMCP) -> None:
                 f"management/v1/counter/{params.counter_id}/offline_conversions/calls/upload",
                 method="POST",
                 params=request_params,
-                json_data={"calls": calls_data}
+                data={"calls": calls_data}
             )
 
             uploading_id = result.get("uploading", {}).get("id")
@@ -245,7 +245,7 @@ def register(mcp: FastMCP) -> None:
             result = await api_client.metrika_request(
                 f"management/v1/counter/{params.counter_id}/expense/upload",
                 method="POST",
-                json_data={"expenses": expenses_data}
+                data={"expenses": expenses_data}
             )
 
             uploading_id = result.get("uploading", {}).get("id")
@@ -293,7 +293,7 @@ def register(mcp: FastMCP) -> None:
                 f"management/v1/counter/{params.counter_id}/user_params/uploadings",
                 method="POST",
                 params={"client_id_type": params.client_id_type},
-                json_data={"users": users_data}
+                data={"users": users_data}
             )
 
             uploading_id = result.get("uploading", {}).get("id")

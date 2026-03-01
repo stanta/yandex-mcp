@@ -13,10 +13,14 @@ EXPECTED_DIRECT_TOOLS = [
     "direct_archive_campaigns",
     "direct_unarchive_campaigns",
     "direct_delete_campaigns",
-    # Ad Groups (3)
+    # Ad Groups (7)
     "direct_get_adgroups",
     "direct_create_adgroup",
     "direct_update_adgroup",
+    "direct_suspend_adgroups",
+    "direct_resume_adgroups",
+    "direct_archive_adgroups",
+    "direct_unarchive_adgroups",
     # Ads (12)
     "direct_get_ads",
     "direct_create_text_ad",
@@ -30,12 +34,14 @@ EXPECTED_DIRECT_TOOLS = [
     "direct_archive_ads",
     "direct_unarchive_ads",
     "direct_delete_ads",
-    # Keywords (6)
+    # Keywords (8)
     "direct_get_keywords",
     "direct_add_keywords",
     "direct_set_keyword_bids",
     "direct_suspend_keywords",
     "direct_resume_keywords",
+    "direct_archive_keywords",
+    "direct_unarchive_keywords",
     "direct_delete_keywords",
     # Statistics (1)
     "direct_get_statistics",
@@ -62,6 +68,13 @@ EXPECTED_DIRECT_TOOLS = [
     "direct_suspend_smart_ad_targets",
     "direct_resume_smart_ad_targets",
     "direct_delete_smart_ad_targets",
+    # Dynamic Text Ad Targets (6)
+    "direct_get_dynamic_text_ad_targets",
+    "direct_add_dynamic_text_ad_target",
+    "direct_update_dynamic_text_ad_target",
+    "direct_suspend_dynamic_text_ad_targets",
+    "direct_resume_dynamic_text_ad_targets",
+    "direct_delete_dynamic_text_ad_targets",
     # Sitelinks (3)
     "direct_get_sitelinks",
     "direct_add_sitelinks",
@@ -75,23 +88,29 @@ EXPECTED_DIRECT_TOOLS = [
     "direct_add_negative_keyword_shared_set",
     "direct_update_negative_keyword_shared_set",
     "direct_delete_negative_keyword_shared_sets",
-    # Ad Extensions (3)
+    # Ad Extensions (5)
     "direct_get_adextensions",
     "direct_add_callouts",
+    "direct_update_adextensions",
+    "direct_delete_adextensions",
     "direct_link_callouts_to_ad",
-    # Videos & Creatives (4)
+    # Videos & Creatives (7)
     "direct_upload_video",
     "direct_get_advideos",
+    "direct_delete_advideos",
     "direct_create_video_creative",
+    "direct_create_cpc_video_creative",
+    "direct_create_cpm_video_creative",
     "direct_get_creatives",
     # Feeds (4)
     "direct_get_feeds",
     "direct_add_feed",
     "direct_update_feed",
     "direct_delete_feeds",
-    # Images (3)
+    # Images (4)
     "direct_upload_image",
     "direct_get_images",
+    "direct_update_image",
     "direct_delete_images",
     # Dictionaries & Regions (3)
     "direct_get_dictionaries",
@@ -102,6 +121,29 @@ EXPECTED_DIRECT_TOOLS = [
     "direct_check_campaign_changes",
     "direct_check_all_changes",
     "direct_get_recent_changes_timestamp",
+    # Lead Forms (5)
+    "direct_get_lead_forms",
+    "direct_add_lead_form",
+    "direct_update_lead_form",
+    "direct_delete_lead_forms",
+    "direct_get_lead_form_leads",
+    # Agency Clients (2)
+    "direct_get_agency_clients",
+    "direct_update_agency_client",
+    # TurboPages (5)
+    "direct_get_turbo_pages",
+    "direct_add_turbo_page",
+    "direct_update_turbo_page",
+    "direct_delete_turbo_pages",
+    "direct_get_turbo_page_templates",
+    # VideoAds (7)
+    "direct_get_video_ad_videos",
+    "direct_add_video_ad_videos",
+    "direct_get_video_ad_groups",
+    "direct_add_video_ad_groups",
+    "direct_update_video_ad_groups",
+    "direct_get_video_ads",
+    "direct_add_video_ads",
 ]
 
 EXPECTED_METRIKA_TOOLS = [
@@ -168,17 +210,27 @@ EXPECTED_WORDSTAT_TOOLS = [
     "wordstat_user_info",
 ]
 
+EXPECTED_OAUTH_TOOLS = [
+    "oauth_get_authorization_url",
+    "oauth_check_token_status",
+    "oauth_revoke_token",
+    "oauth_exchange_code",
+    "oauth_poll_device_token",
+    "oauth_refresh_token",
+    "oauth_get_device_code",
+]
+
 
 class TestToolRegistration:
     """Test that all tools are properly registered."""
 
     def test_total_tool_count(self, mcp_instance):
         tools = list(mcp_instance._tool_manager._tools.keys())
-        expected = len(EXPECTED_DIRECT_TOOLS) + len(EXPECTED_METRIKA_TOOLS) + len(EXPECTED_WORDSTAT_TOOLS)
+        expected = len(EXPECTED_DIRECT_TOOLS) + len(EXPECTED_METRIKA_TOOLS) + len(EXPECTED_WORDSTAT_TOOLS) + len(EXPECTED_OAUTH_TOOLS)
         assert len(tools) == expected, (
             f"Expected {expected} tools, got {len(tools)}. "
-            f"Missing: {set(EXPECTED_DIRECT_TOOLS + EXPECTED_METRIKA_TOOLS + EXPECTED_WORDSTAT_TOOLS) - set(tools)}. "
-            f"Extra: {set(tools) - set(EXPECTED_DIRECT_TOOLS + EXPECTED_METRIKA_TOOLS + EXPECTED_WORDSTAT_TOOLS)}"
+            f"Missing: {set(EXPECTED_DIRECT_TOOLS + EXPECTED_METRIKA_TOOLS + EXPECTED_WORDSTAT_TOOLS + EXPECTED_OAUTH_TOOLS) - set(tools)}. "
+            f"Extra: {set(tools) - set(EXPECTED_DIRECT_TOOLS + EXPECTED_METRIKA_TOOLS + EXPECTED_WORDSTAT_TOOLS + EXPECTED_OAUTH_TOOLS)}"
         )
 
     def test_direct_tool_count(self, mcp_instance):
@@ -225,7 +277,7 @@ class TestToolNaming:
             assert tool.startswith("wordstat_"), f"Wordstat tool not properly prefixed: {tool}"
 
     def test_no_unknown_prefixes(self, mcp_instance):
-        known_prefixes = ("direct_", "metrika_", "wordstat_")
+        known_prefixes = ("direct_", "metrika_", "wordstat_", "oauth_")
         for tool in mcp_instance._tool_manager._tools:
             assert any(tool.startswith(p) for p in known_prefixes), f"Unknown prefix in tool: {tool}"
 
@@ -262,3 +314,913 @@ class TestImports:
     def test_import_formatters(self):
         from yandex_mcp.formatters.wordstat import format_wordstat_top_requests_markdown
         assert callable(format_wordstat_top_requests_markdown)
+
+    def test_package_has_main_module(self):
+        """Package should expose __main__ to support `python -m yandex_mcp`."""
+        import importlib.util
+
+        spec = importlib.util.find_spec("yandex_mcp.__main__")
+        assert spec is not None
+
+    def test_cli_server_file_exposes_mcp_object(self):
+        """`server.py` should expose a top-level `mcp` object for `mcp dev/run` FILE_SPEC usage."""
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("yandex_mcp_cli_server", "server.py")
+        assert spec is not None and spec.loader is not None
+
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        assert hasattr(module, "mcp")
+
+
+class TestBiddingStrategies:
+    """Test bidding strategy models and enums."""
+
+    def test_bidding_strategy_types_enum(self):
+        """Test that all bidding strategy types are defined."""
+        from yandex_mcp.models.direct import BiddingStrategyType
+        
+        # Verify all expected strategies exist
+        assert BiddingStrategyType.WB_MAXIMUM_CLICKS.value == "WB_MAXIMUM_CLICKS"
+        assert BiddingStrategyType.AVERAGE_CPC.value == "AVERAGE_CPC"
+        assert BiddingStrategyType.WB_MAXIMUM_CONVERSION_RATE.value == "WB_MAXIMUM_CONVERSION_RATE"
+        assert BiddingStrategyType.AVERAGE_CPA.value == "AVERAGE_CPA"
+        assert BiddingStrategyType.AVERAGE_ROI.value == "AVERAGE_ROI"
+        assert BiddingStrategyType.PAY_FOR_CONVERSION.value == "PAY_FOR_CONVERSION"
+        assert BiddingStrategyType.PAY_FOR_CONVERSION_CRR.value == "PAY_FOR_CONVERSION_CRR"
+        assert BiddingStrategyType.SERVING_OFF.value == "SERVING_OFF"
+
+    def test_update_campaign_input_with_average_cpa(self):
+        """Test UpdateCampaignInput with AVERAGE_CPA strategy."""
+        from yandex_mcp.models.direct import UpdateCampaignInput, BiddingStrategyType
+        
+        input_data = UpdateCampaignInput(
+            campaign_id=12345678,
+            bidding_strategy_type=BiddingStrategyType.AVERAGE_CPA,
+            average_cpa=500.0,
+            goal_id=9876543,
+            weekly_spend_limit=10000.0
+        )
+        assert input_data.campaign_id == 12345678
+        assert input_data.bidding_strategy_type == BiddingStrategyType.AVERAGE_CPA
+        assert input_data.average_cpa == 500.0
+        assert input_data.goal_id == 9876543
+        assert input_data.weekly_spend_limit == 10000.0
+
+    def test_update_campaign_input_with_average_roi(self):
+        """Test UpdateCampaignInput with AVERAGE_ROI strategy."""
+        from yandex_mcp.models.direct import UpdateCampaignInput, BiddingStrategyType
+        
+        input_data = UpdateCampaignInput(
+            campaign_id=12345678,
+            bidding_strategy_type=BiddingStrategyType.AVERAGE_ROI,
+            roi_coef=1.5,
+            reserve_return=0.8,
+            goal_id=9876543,
+            weekly_spend_limit=5000.0
+        )
+        assert input_data.bidding_strategy_type == BiddingStrategyType.AVERAGE_ROI
+        assert input_data.roi_coef == 1.5
+        assert input_data.reserve_return == 0.8
+        assert input_data.goal_id == 9876543
+
+    def test_update_campaign_input_with_pay_for_conversion(self):
+        """Test UpdateCampaignInput with PAY_FOR_CONVERSION strategy."""
+        from yandex_mcp.models.direct import UpdateCampaignInput, BiddingStrategyType
+        
+        input_data = UpdateCampaignInput(
+            campaign_id=12345678,
+            bidding_strategy_type=BiddingStrategyType.PAY_FOR_CONVERSION,
+            max_conversion_cost=1000.0,
+            goal_id=9876543
+        )
+        assert input_data.bidding_strategy_type == BiddingStrategyType.PAY_FOR_CONVERSION
+        assert input_data.max_conversion_cost == 1000.0
+        assert input_data.goal_id == 9876543
+
+    def test_update_campaign_input_with_pay_for_conversion_crr(self):
+        """Test UpdateCampaignInput with PAY_FOR_CONVERSION_CRR strategy."""
+        from yandex_mcp.models.direct import UpdateCampaignInput, BiddingStrategyType
+        
+        input_data = UpdateCampaignInput(
+            campaign_id=12345678,
+            bidding_strategy_type=BiddingStrategyType.PAY_FOR_CONVERSION_CRR,
+            crr_limit=50.0,
+            goal_id=9876543
+        )
+        assert input_data.bidding_strategy_type == BiddingStrategyType.PAY_FOR_CONVERSION_CRR
+        assert input_data.crr_limit == 50.0
+        assert input_data.goal_id == 9876543
+
+    def test_create_campaign_input_with_average_cpa(self):
+        """Test CreateCampaignInput with AVERAGE_CPA strategy."""
+        from yandex_mcp.models.direct import CreateCampaignInput, BiddingStrategyType, CampaignType
+        
+        input_data = CreateCampaignInput(
+            name="Test Campaign",
+            start_date="2026-03-01",
+            campaign_type=CampaignType.TEXT_CAMPAIGN,
+            search_strategy_type=BiddingStrategyType.AVERAGE_CPA,
+            average_cpa=500.0,
+            goal_id=9876543
+        )
+        assert input_data.name == "Test Campaign"
+        assert input_data.search_strategy_type == BiddingStrategyType.AVERAGE_CPA
+        assert input_data.average_cpa == 500.0
+        assert input_data.goal_id == 9876543
+
+    def test_create_campaign_input_with_average_roi(self):
+        """Test CreateCampaignInput with AVERAGE_ROI strategy."""
+        from yandex_mcp.models.direct import CreateCampaignInput, BiddingStrategyType, CampaignType
+        
+        input_data = CreateCampaignInput(
+            name="Test ROI Campaign",
+            start_date="2026-03-01",
+            campaign_type=CampaignType.TEXT_CAMPAIGN,
+            search_strategy_type=BiddingStrategyType.AVERAGE_ROI,
+            roi_coef=2.0,
+            reserve_return=1.0,
+            goal_id=9876543
+        )
+        assert input_data.search_strategy_type == BiddingStrategyType.AVERAGE_ROI
+        assert input_data.roi_coef == 2.0
+        assert input_data.reserve_return == 1.0
+
+    def test_create_campaign_input_with_pay_for_conversion(self):
+        """Test CreateCampaignInput with PAY_FOR_CONVERSION strategy."""
+        from yandex_mcp.models.direct import CreateCampaignInput, BiddingStrategyType, CampaignType
+        
+        input_data = CreateCampaignInput(
+            name="Test PFC Campaign",
+            start_date="2026-03-01",
+            campaign_type=CampaignType.TEXT_CAMPAIGN,
+            search_strategy_type=BiddingStrategyType.PAY_FOR_CONVERSION,
+            max_conversion_cost=750.0,
+            goal_id=9876543
+        )
+        assert input_data.search_strategy_type == BiddingStrategyType.PAY_FOR_CONVERSION
+        assert input_data.max_conversion_cost == 750.0
+
+    def test_create_campaign_input_with_pay_for_conversion_crr(self):
+        """Test CreateCampaignInput with PAY_FOR_CONVERSION_CRR strategy."""
+        from yandex_mcp.models.direct import CreateCampaignInput, BiddingStrategyType, CampaignType
+        
+        input_data = CreateCampaignInput(
+            name="Test PFC CRR Campaign",
+            start_date="2026-03-01",
+            campaign_type=CampaignType.TEXT_CAMPAIGN,
+            search_strategy_type=BiddingStrategyType.PAY_FOR_CONVERSION_CRR,
+            crr_limit=75.0,
+            goal_id=9876543
+        )
+        assert input_data.search_strategy_type == BiddingStrategyType.PAY_FOR_CONVERSION_CRR
+        assert input_data.crr_limit == 75.0
+
+
+class TestLeadFormsModels:
+    """Test LeadForms models and enums."""
+
+    def test_question_type_enum(self):
+        """Test that all question types are defined."""
+        from yandex_mcp.models.direct_extended import QuestionType
+        
+        assert QuestionType.NAME.value == "NAME"
+        assert QuestionType.PHONE.value == "PHONE"
+        assert QuestionType.EMAIL.value == "EMAIL"
+        assert QuestionType.ADDRESS.value == "ADDRESS"
+        assert QuestionType.COMMENT.value == "COMMENT"
+        assert QuestionType.CHECKBOX.value == "CHECKBOX"
+
+    def test_lead_form_question_model(self):
+        """Test LeadFormQuestion model."""
+        from yandex_mcp.models.direct_extended import LeadFormQuestion, QuestionType
+        
+        question = LeadFormQuestion(
+            type=QuestionType.PHONE,
+            required=True,
+            label="Your phone number"
+        )
+        assert question.type == QuestionType.PHONE
+        assert question.required is True
+        assert question.label == "Your phone number"
+
+    def test_add_lead_form_input_model(self):
+        """Test AddLeadFormInput model."""
+        from yandex_mcp.models.direct_extended import AddLeadFormInput, LeadFormQuestion, QuestionType
+        
+        questions = [
+            LeadFormQuestion(type=QuestionType.NAME, required=True),
+            LeadFormQuestion(type=QuestionType.PHONE, required=True),
+            LeadFormQuestion(type=QuestionType.EMAIL, required=False),
+        ]
+        
+        input_data = AddLeadFormInput(
+            name="Contact Form",
+            campaign_id=12345678,
+            url="https://example.com/contact",
+            policy_url="https://example.com/privacy",
+            short_form=False,
+            questions=questions
+        )
+        assert input_data.name == "Contact Form"
+        assert input_data.campaign_id == 12345678
+        assert input_data.short_form is False
+        assert len(input_data.questions) == 3
+
+    def test_update_lead_form_input_model(self):
+        """Test UpdateLeadFormInput model."""
+        from yandex_mcp.models.direct_extended import UpdateLeadFormInput
+        
+        input_data = UpdateLeadFormInput(
+            form_id=12345,
+            name="Updated Form Name",
+            url="https://example.com/new-page"
+        )
+        assert input_data.form_id == 12345
+        assert input_data.name == "Updated Form Name"
+        assert input_data.url == "https://example.com/new-page"
+
+    def test_get_lead_forms_input_model(self):
+        """Test GetLeadFormsInput model."""
+        from yandex_mcp.models.direct_extended import GetLeadFormsInput
+        
+        input_data = GetLeadFormsInput(
+            campaign_ids=[12345678, 87654321],
+            form_ids=[111, 222],
+            limit=50,
+            offset=0
+        )
+        assert input_data.campaign_ids == [12345678, 87654321]
+        assert input_data.form_ids == [111, 222]
+        assert input_data.limit == 50
+
+    def test_delete_lead_forms_input_model(self):
+        """Test DeleteLeadFormsInput model."""
+        from yandex_mcp.models.direct_extended import DeleteLeadFormsInput
+        
+        input_data = DeleteLeadFormsInput(
+            form_ids=[111, 222, 333]
+        )
+        assert input_data.form_ids == [111, 222, 333]
+
+
+class TestBidModifiersModels:
+    """Test BidModifiers models including Video and Retargeting adjustments."""
+
+    def test_video_adjustment_model(self):
+        """Test VideoAdjustment model."""
+        from yandex_mcp.models.direct_extended import VideoAdjustment
+        
+        # Test valid bid modifier
+        adjustment = VideoAdjustment(bid_modifier=150)
+        assert adjustment.bid_modifier == 150
+        
+        # Test minimum value (0 = disable)
+        adjustment_min = VideoAdjustment(bid_modifier=0)
+        assert adjustment_min.bid_modifier == 0
+        
+        # Test maximum value (1300 = 13x)
+        adjustment_max = VideoAdjustment(bid_modifier=1300)
+        assert adjustment_max.bid_modifier == 1300
+
+    def test_video_adjustment_validation(self):
+        """Test VideoAdjustment validation."""
+        from yandex_mcp.models.direct_extended import VideoAdjustment
+        from pydantic import ValidationError
+        
+        # Test invalid - too low
+        with pytest.raises(ValidationError):
+            VideoAdjustment(bid_modifier=-1)
+        
+        # Test invalid - too high
+        with pytest.raises(ValidationError):
+            VideoAdjustment(bid_modifier=1301)
+
+    def test_retargeting_adjustment_model(self):
+        """Test RetargetingAdjustment model."""
+        from yandex_mcp.models.direct_extended import RetargetingAdjustment
+        
+        # Test with enabled=True (default)
+        adjustment = RetargetingAdjustment(
+            retargeting_list_id=12345,
+            bid_modifier=120
+        )
+        assert adjustment.retargeting_list_id == 12345
+        assert adjustment.bid_modifier == 120
+        assert adjustment.enabled is True
+        
+        # Test with enabled=False
+        adjustment_disabled = RetargetingAdjustment(
+            retargeting_list_id=67890,
+            bid_modifier=100,
+            enabled=False
+        )
+        assert adjustment_disabled.enabled is False
+
+    def test_retargeting_adjustment_validation(self):
+        """Test RetargetingAdjustment validation."""
+        from yandex_mcp.models.direct_extended import RetargetingAdjustment
+        from pydantic import ValidationError
+        
+        # Test invalid - too low
+        with pytest.raises(ValidationError):
+            RetargetingAdjustment(retargeting_list_id=123, bid_modifier=-1)
+        
+        # Test invalid - too high
+        with pytest.raises(ValidationError):
+            RetargetingAdjustment(retargeting_list_id=123, bid_modifier=1301)
+
+    def test_add_bid_modifier_with_video_adjustment(self):
+        """Test AddBidModifierInput with video adjustment."""
+        from yandex_mcp.models.direct_extended import AddBidModifierInput, VideoAdjustment
+        
+        input_data = AddBidModifierInput(
+            campaign_id=12345678,
+            video_adjustment=VideoAdjustment(bid_modifier=150)
+        )
+        assert input_data.campaign_id == 12345678
+        assert input_data.video_adjustment is not None
+        assert input_data.video_adjustment.bid_modifier == 150
+
+    def test_add_bid_modifier_with_retargeting_adjustments(self):
+        """Test AddBidModifierInput with retargeting adjustments."""
+        from yandex_mcp.models.direct_extended import AddBidModifierInput, RetargetingAdjustment
+        
+        input_data = AddBidModifierInput(
+            campaign_id=12345678,
+            retargeting_adjustments=[
+                RetargetingAdjustment(retargeting_list_id=111, bid_modifier=120),
+                RetargetingAdjustment(retargeting_list_id=222, bid_modifier=80, enabled=False),
+            ]
+        )
+        assert input_data.campaign_id == 12345678
+        assert len(input_data.retargeting_adjustments) == 2
+        assert input_data.retargeting_adjustments[0].bid_modifier == 120
+        assert input_data.retargeting_adjustments[1].enabled is False
+
+    def test_add_bid_modifier_with_all_adjustment_types(self):
+        """Test AddBidModifierInput with all adjustment types."""
+        from yandex_mcp.models.direct_extended import (
+            AddBidModifierInput, MobileAdjustment, DesktopAdjustment,
+            DemographicsAdjustment, RegionalAdjustment, VideoAdjustment,
+            RetargetingAdjustment
+        )
+        
+        input_data = AddBidModifierInput(
+            campaign_id=12345678,
+            mobile_adjustment=MobileAdjustment(bid_modifier=120),
+            desktop_adjustment=DesktopAdjustment(bid_modifier=100),
+            demographics_adjustments=[
+                DemographicsAdjustment(gender="GENDER_MALE", age="AGE_25_34", bid_modifier=110)
+            ],
+            regional_adjustments=[
+                RegionalAdjustment(region_id=213, bid_modifier=130)
+            ],
+            video_adjustment=VideoAdjustment(bid_modifier=150),
+            retargeting_adjustments=[
+                RetargetingAdjustment(retargeting_list_id=123, bid_modifier=140)
+            ]
+        )
+        
+        assert input_data.campaign_id == 12345678
+        assert input_data.mobile_adjustment.bid_modifier == 120
+        assert input_data.desktop_adjustment.bid_modifier == 100
+        assert len(input_data.demographics_adjustments) == 1
+        assert len(input_data.regional_adjustments) == 1
+        assert input_data.video_adjustment.bid_modifier == 150
+        assert len(input_data.retargeting_adjustments) == 1
+
+
+class TestAgencyClientsModels:
+    """Test AgencyClients models."""
+
+    def test_get_agency_clients_input_model(self):
+        """Test GetAgencyClientsInput model."""
+        from yandex_mcp.models.direct_extended import GetAgencyClientsInput
+        
+        input_data = GetAgencyClientsInput(
+            logins=["client1", "client2"],
+            status=["ALLOWED", "SUSPENDED"],
+            limit=50,
+            offset=0
+        )
+        assert input_data.logins == ["client1", "client2"]
+        assert input_data.status == ["ALLOWED", "SUSPENDED"]
+        assert input_data.limit == 50
+        assert input_data.offset == 0
+
+    def test_get_agency_clients_input_defaults(self):
+        """Test GetAgencyClientsInput with default values."""
+        from yandex_mcp.models.direct_extended import GetAgencyClientsInput
+        
+        input_data = GetAgencyClientsInput()
+        assert input_data.logins is None
+        assert input_data.status is None
+        assert input_data.limit == 100
+        assert input_data.offset == 0
+
+    def test_agency_client_settings_model(self):
+        """Test AgencyClientSettings model."""
+        from yandex_mcp.models.direct_extended import AgencyClientSettings
+        
+        settings = AgencyClientSettings(
+            send_account_warnings=True,
+            send_notification_about_warnings=False
+        )
+        assert settings.send_account_warnings is True
+        assert settings.send_notification_about_warnings is False
+
+    def test_agency_client_notification_model(self):
+        """Test AgencyClientNotification model."""
+        from yandex_mcp.models.direct_extended import AgencyClientNotification
+        
+        notification = AgencyClientNotification(
+            email="client@example.com",
+            email_balance=True,
+            email_trade_offers=False,
+            email_advertising_on_account=True
+        )
+        assert notification.email == "client@example.com"
+        assert notification.email_balance is True
+        assert notification.email_trade_offers is False
+        assert notification.email_advertising_on_account is True
+
+    def test_update_agency_client_input_model(self):
+        """Test UpdateAgencyClientInput model."""
+        from yandex_mcp.models.direct_extended import (
+            UpdateAgencyClientInput,
+            AgencyClientSettings,
+            AgencyClientNotification
+        )
+        
+        input_data = UpdateAgencyClientInput(
+            login="client_login",
+            settings=AgencyClientSettings(
+                send_account_warnings=True
+            ),
+            notification=AgencyClientNotification(
+                email="client@example.com",
+                email_balance=True
+            )
+        )
+        assert input_data.login == "client_login"
+        assert input_data.settings is not None
+        assert input_data.settings.send_account_warnings is True
+        assert input_data.notification is not None
+        assert input_data.notification.email == "client@example.com"
+
+    def test_update_agency_client_input_login_only(self):
+        """Test UpdateAgencyClientInput with only login."""
+        from yandex_mcp.models.direct_extended import UpdateAgencyClientInput
+        
+        input_data = UpdateAgencyClientInput(
+            login="client_login"
+        )
+        assert input_data.login == "client_login"
+        assert input_data.settings is None
+        assert input_data.notification is None
+
+
+class TestCreativesModels:
+    """Test Creatives input models."""
+
+    def test_create_video_extension_creative_input_model(self):
+        """Test CreateVideoExtensionCreativeInput model."""
+        from yandex_mcp.tools.direct.creatives import CreateVideoExtensionCreativeInput
+        
+        input_data = CreateVideoExtensionCreativeInput(
+            video_id="abc123"
+        )
+        assert input_data.video_id == "abc123"
+
+    def test_create_cpc_video_creative_input_model(self):
+        """Test CreateCPCVideoCreativeInput model."""
+        from yandex_mcp.tools.direct.creatives import CreateCPCVideoCreativeInput
+        
+        # Test with only required fields
+        input_data = CreateCPCVideoCreativeInput(
+            video_id="abc123"
+        )
+        assert input_data.video_id == "abc123"
+        assert input_data.title is None
+        assert input_data.trailer_version is None
+        
+        # Test with optional fields
+        input_data_full = CreateCPCVideoCreativeInput(
+            video_id="def456",
+            title="My Video Ad",
+            trailer_version="FULL"
+        )
+        assert input_data_full.video_id == "def456"
+        assert input_data_full.title == "My Video Ad"
+        assert input_data_full.trailer_version == "FULL"
+
+    def test_create_cpm_video_creative_input_model(self):
+        """Test CreateCPMVideoCreativeInput model."""
+        from yandex_mcp.tools.direct.creatives import CreateCPMVideoCreativeInput
+        
+        # Test with only required fields
+        input_data = CreateCPMVideoCreativeInput(
+            video_id="abc123"
+        )
+        assert input_data.video_id == "abc123"
+        assert input_data.title is None
+        assert input_data.trailer_version is None
+        
+        # Test with optional fields
+        input_data_full = CreateCPMVideoCreativeInput(
+            video_id="ghi789",
+            title="Display Video Ad",
+            trailer_version="SHORT"
+        )
+        assert input_data_full.video_id == "ghi789"
+        assert input_data_full.title == "Display Video Ad"
+        assert input_data_full.trailer_version == "SHORT"
+
+    def test_get_creatives_input_model(self):
+        """Test GetCreativesInput model."""
+        from yandex_mcp.tools.direct.creatives import GetCreativesInput
+        
+        # Test with default values
+        input_data = GetCreativesInput()
+        assert input_data.creative_ids is None
+        assert input_data.types is None
+        assert input_data.limit == 100
+        
+        # Test with filters
+        input_data_filtered = GetCreativesInput(
+            creative_ids=[123, 456],
+            types=["CPC_VIDEO_CREATIVE", "CPM_VIDEO_CREATIVE"],
+            limit=50
+        )
+        assert input_data_filtered.creative_ids == [123, 456]
+        assert input_data_filtered.types == ["CPC_VIDEO_CREATIVE", "CPM_VIDEO_CREATIVE"]
+        assert input_data_filtered.limit == 50
+
+
+class TestAdVideosModels:
+    """Test AdVideos input models."""
+
+    def test_delete_advideos_input_model(self):
+        """Test DeleteAdVideosInput model."""
+        from yandex_mcp.tools.direct.advideos import DeleteAdVideosInput
+        
+        input_data = DeleteAdVideosInput(
+            video_ids=["abc123", "def456", "ghi789"]
+        )
+        assert input_data.video_ids == ["abc123", "def456", "ghi789"]
+        assert len(input_data.video_ids) == 3
+
+    def test_delete_advideos_input_single_id(self):
+        """Test DeleteAdVideosInput with single video ID."""
+        from yandex_mcp.tools.direct.advideos import DeleteAdVideosInput
+        
+        input_data = DeleteAdVideosInput(
+            video_ids=["single_video_id"]
+        )
+        assert input_data.video_ids == ["single_video_id"]
+        assert len(input_data.video_ids) == 1
+
+
+class TestTurboPagesModels:
+    """Test TurboPages models."""
+
+    def test_get_turbo_pages_input_model(self):
+        """Test GetTurboPagesInput model."""
+        from yandex_mcp.models.direct_extended import GetTurboPagesInput
+        
+        input_data = GetTurboPagesInput(
+            turbo_page_ids=[111, 222],
+            limit=50,
+            offset=10
+        )
+        assert input_data.turbo_page_ids == [111, 222]
+        assert input_data.limit == 50
+        assert input_data.offset == 10
+
+    def test_get_turbo_pages_input_defaults(self):
+        """Test GetTurboPagesInput with default values."""
+        from yandex_mcp.models.direct_extended import GetTurboPagesInput
+        
+        input_data = GetTurboPagesInput()
+        assert input_data.turbo_page_ids is None
+        assert input_data.limit == 100
+        assert input_data.offset == 0
+
+    def test_turbo_page_input_model(self):
+        """Test TurboPageInput model for creating."""
+        from yandex_mcp.models.direct_extended import TurboPageInput
+        
+        input_data = TurboPageInput(
+            name="My Turbo Page",
+            url="https://example.com"
+        )
+        assert input_data.name == "My Turbo Page"
+        assert input_data.url == "https://example.com"
+        assert input_data.turbo_site_id is None
+
+    def test_turbo_page_input_with_turbo_site_id(self):
+        """Test TurboPageInput with turbo_site_id."""
+        from yandex_mcp.models.direct_extended import TurboPageInput
+        
+        input_data = TurboPageInput(
+            name="My Turbo Page",
+            url="https://example.com",
+            turbo_site_id=12345
+        )
+        assert input_data.turbo_site_id == 12345
+
+    def test_turbo_page_input_for_update(self):
+        """Test TurboPageInput model for updating."""
+        from yandex_mcp.models.direct_extended import TurboPageInput
+        
+        input_data = TurboPageInput(
+            name="Updated Page",
+            url="https://example.org",
+            turbo_page_ids=[111]
+        )
+        assert input_data.name == "Updated Page"
+        assert input_data.url == "https://example.org"
+        assert input_data.turbo_page_ids == [111]
+
+    def test_delete_turbo_pages_input_model(self):
+        """Test DeleteTurboPagesInput model."""
+        from yandex_mcp.models.direct_extended import DeleteTurboPagesInput
+        
+        input_data = DeleteTurboPagesInput(
+            turbo_page_ids=[111, 222, 333]
+        )
+        assert input_data.turbo_page_ids == [111, 222, 333]
+
+
+class TestVideoAdsModels:
+    """Test VideoAds models."""
+
+    def test_get_video_ad_videos_input_model(self):
+        """Test GetVideoAdVideosInput model."""
+        from yandex_mcp.models.direct_extended import GetVideoAdVideosInput
+        
+        input_data = GetVideoAdVideosInput(
+            video_ad_video_ids=[111, 222],
+            campaign_ids=[12345678],
+            limit=50,
+            offset=10
+        )
+        assert input_data.video_ad_video_ids == [111, 222]
+        assert input_data.campaign_ids == [12345678]
+        assert input_data.limit == 50
+        assert input_data.offset == 10
+
+    def test_get_video_ad_videos_input_defaults(self):
+        """Test GetVideoAdVideosInput with default values."""
+        from yandex_mcp.models.direct_extended import GetVideoAdVideosInput
+        
+        input_data = GetVideoAdVideosInput()
+        assert input_data.video_ad_video_ids is None
+        assert input_data.campaign_ids is None
+        assert input_data.limit == 100
+        assert input_data.offset == 0
+
+    def test_video_ad_video_input_model(self):
+        """Test VideoAdVideoInput model for creating."""
+        from yandex_mcp.models.direct_extended import VideoAdVideoInput
+        
+        input_data = VideoAdVideoInput(
+            name="My Video Ad",
+            video_url="https://example.com/video.mp4"
+        )
+        assert input_data.name == "My Video Ad"
+        assert input_data.video_url == "https://example.com/video.mp4"
+
+    def test_add_video_ad_videos_input_model(self):
+        """Test AddVideoAdVideosInput model."""
+        from yandex_mcp.models.direct_extended import AddVideoAdVideosInput, VideoAdVideoInput
+        
+        videos = [
+            VideoAdVideoInput(name="Video 1", video_url="https://example.com/v1.mp4"),
+            VideoAdVideoInput(name="Video 2", video_url="https://example.com/v2.mp4"),
+        ]
+        
+        input_data = AddVideoAdVideosInput(videos=videos)
+        assert len(input_data.videos) == 2
+        assert input_data.videos[0].name == "Video 1"
+        assert input_data.videos[1].name == "Video 2"
+
+    def test_get_video_ad_groups_input_model(self):
+        """Test GetVideoAdGroupsInput model."""
+        from yandex_mcp.models.direct_extended import GetVideoAdGroupsInput
+        
+        input_data = GetVideoAdGroupsInput(
+            video_ad_group_ids=[111, 222],
+            campaign_ids=[12345678],
+            limit=50,
+            offset=10
+        )
+        assert input_data.video_ad_group_ids == [111, 222]
+        assert input_data.campaign_ids == [12345678]
+        assert input_data.limit == 50
+        assert input_data.offset == 10
+
+    def test_video_ad_group_input_model(self):
+        """Test VideoAdGroupInput model."""
+        from yandex_mcp.models.direct_extended import VideoAdGroupInput
+        
+        input_data = VideoAdGroupInput(
+            campaign_id=12345678,
+            name="My Video Ad Group",
+            region_ids=[213, 107]
+        )
+        assert input_data.campaign_id == 12345678
+        assert input_data.name == "My Video Ad Group"
+        assert input_data.region_ids == [213, 107]
+
+    def test_add_video_ad_groups_input_model(self):
+        """Test AddVideoAdGroupsInput model."""
+        from yandex_mcp.models.direct_extended import AddVideoAdGroupsInput, VideoAdGroupInput
+        
+        ad_groups = [
+            VideoAdGroupInput(
+                campaign_id=12345678,
+                name="Video Ad Group 1",
+                region_ids=[213]
+            ),
+            VideoAdGroupInput(
+                campaign_id=12345678,
+                name="Video Ad Group 2",
+                region_ids=[107]
+            ),
+        ]
+        
+        input_data = AddVideoAdGroupsInput(ad_groups=ad_groups)
+        assert len(input_data.ad_groups) == 2
+        assert input_data.ad_groups[0].name == "Video Ad Group 1"
+        assert input_data.ad_groups[1].name == "Video Ad Group 2"
+
+    def test_update_video_ad_group_input_model(self):
+        """Test UpdateVideoAdGroupInput model."""
+        from yandex_mcp.models.direct_extended import UpdateVideoAdGroupInput
+        
+        input_data = UpdateVideoAdGroupInput(
+            video_ad_group_id=111,
+            name="Updated Group Name",
+            region_ids=[213, 107]
+        )
+        assert input_data.video_ad_group_id == 111
+        assert input_data.name == "Updated Group Name"
+        assert input_data.region_ids == [213, 107]
+
+    def test_update_video_ad_groups_input_model(self):
+        """Test UpdateVideoAdGroupsInput model."""
+        from yandex_mcp.models.direct_extended import UpdateVideoAdGroupsInput, UpdateVideoAdGroupInput
+        
+        ad_groups = [
+            UpdateVideoAdGroupInput(video_ad_group_id=111, name="Updated 1"),
+            UpdateVideoAdGroupInput(video_ad_group_id=222, region_ids=[213]),
+        ]
+        
+        input_data = UpdateVideoAdGroupsInput(ad_groups=ad_groups)
+        assert len(input_data.ad_groups) == 2
+        assert input_data.ad_groups[0].video_ad_group_id == 111
+        assert input_data.ad_groups[1].video_ad_group_id == 222
+
+    def test_get_video_ads_input_model(self):
+        """Test GetVideoAdsInput model."""
+        from yandex_mcp.models.direct_extended import GetVideoAdsInput
+        
+        input_data = GetVideoAdsInput(
+            video_ad_ids=[111, 222],
+            campaign_ids=[12345678],
+            ad_group_ids=[333, 444],
+            limit=50,
+            offset=10
+        )
+        assert input_data.video_ad_ids == [111, 222]
+        assert input_data.campaign_ids == [12345678]
+        assert input_data.ad_group_ids == [333, 444]
+        assert input_data.limit == 50
+        assert input_data.offset == 10
+
+    def test_video_ad_input_model(self):
+        """Test VideoAdInput model."""
+        from yandex_mcp.models.direct_extended import VideoAdInput
+        
+        input_data = VideoAdInput(
+            video_ad_group_id=111,
+            video_ad_video_id=222,
+            title="My Video Ad Title",
+            link_url="https://example.com/landing",
+            display_url="example.com",
+            vcard_id=333,
+            href_param="utm_source=yandex"
+        )
+        assert input_data.video_ad_group_id == 111
+        assert input_data.video_ad_video_id == 222
+        assert input_data.title == "My Video Ad Title"
+        assert input_data.link_url == "https://example.com/landing"
+        assert input_data.display_url == "example.com"
+        assert input_data.vcard_id == 333
+        assert input_data.href_param == "utm_source=yandex"
+
+    def test_video_ad_input_minimal(self):
+        """Test VideoAdInput with minimal required fields."""
+        from yandex_mcp.models.direct_extended import VideoAdInput
+        
+        input_data = VideoAdInput(
+            video_ad_group_id=111,
+            video_ad_video_id=222,
+            title="Minimal Video Ad",
+            link_url="https://example.com"
+        )
+        assert input_data.video_ad_group_id == 111
+        assert input_data.video_ad_video_id == 222
+        assert input_data.title == "Minimal Video Ad"
+        assert input_data.link_url == "https://example.com"
+        assert input_data.display_url is None
+        assert input_data.vcard_id is None
+        assert input_data.href_param is None
+
+    def test_add_video_ads_input_model(self):
+        """Test AddVideoAdsInput model."""
+        from yandex_mcp.models.direct_extended import AddVideoAdsInput, VideoAdInput
+        
+        ads = [
+            VideoAdInput(
+                video_ad_group_id=111,
+                video_ad_video_id=222,
+                title="Video Ad 1",
+                link_url="https://example.com/1"
+            ),
+            VideoAdInput(
+                video_ad_group_id=111,
+                video_ad_video_id=333,
+                title="Video Ad 2",
+                link_url="https://example.com/2",
+                display_url="example.com"
+            ),
+        ]
+        
+        input_data = AddVideoAdsInput(ads=ads)
+        assert len(input_data.ads) == 2
+        assert input_data.ads[0].title == "Video Ad 1"
+        assert input_data.ads[1].title == "Video Ad 2"
+
+
+class TestAdExtensionsModels:
+    """Test AdExtensions input models."""
+
+    def test_update_callout_input_model(self):
+        """Test UpdateCalloutInput model."""
+        from yandex_mcp.tools.direct.adextensions import UpdateCalloutInput
+        
+        input_data = UpdateCalloutInput(
+            extension_id=12345,
+            callout_text="Updated callout text"
+        )
+        assert input_data.extension_id == 12345
+        assert input_data.callout_text == "Updated callout text"
+
+    def test_update_callout_input_validation(self):
+        """Test UpdateCalloutInput validation."""
+        from yandex_mcp.tools.direct.adextensions import UpdateCalloutInput
+        from pydantic import ValidationError
+        
+        # Test valid input with max length
+        input_data = UpdateCalloutInput(
+            extension_id=12345,
+            callout_text="a" * 25
+        )
+        assert len(input_data.callout_text) == 25
+        
+        # Test invalid - text too long
+        with pytest.raises(ValidationError):
+            UpdateCalloutInput(extension_id=12345, callout_text="a" * 26)
+
+    def test_delete_adextensions_input_model(self):
+        """Test DeleteAdExtensionsInput model."""
+        from yandex_mcp.tools.direct.adextensions import DeleteAdExtensionsInput
+        
+        input_data = DeleteAdExtensionsInput(
+            extension_ids=[111, 222, 333]
+        )
+        assert input_data.extension_ids == [111, 222, 333]
+        assert len(input_data.extension_ids) == 3
+
+    def test_delete_adextensions_input_single_id(self):
+        """Test DeleteAdExtensionsInput with single ID."""
+        from yandex_mcp.tools.direct.adextensions import DeleteAdExtensionsInput
+        
+        input_data = DeleteAdExtensionsInput(
+            extension_ids=[111]
+        )
+        assert input_data.extension_ids == [111]
+        assert len(input_data.extension_ids) == 1
+
+    def test_delete_adextensions_input_validation(self):
+        """Test DeleteAdExtensionsInput validation - must have at least 1 ID."""
+        from yandex_mcp.tools.direct.adextensions import DeleteAdExtensionsInput
+        from pydantic import ValidationError
+        
+        with pytest.raises(ValidationError):
+            DeleteAdExtensionsInput(extension_ids=[])
