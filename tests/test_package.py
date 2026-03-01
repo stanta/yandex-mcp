@@ -315,6 +315,25 @@ class TestImports:
         from yandex_mcp.formatters.wordstat import format_wordstat_top_requests_markdown
         assert callable(format_wordstat_top_requests_markdown)
 
+    def test_package_has_main_module(self):
+        """Package should expose __main__ to support `python -m yandex_mcp`."""
+        import importlib.util
+
+        spec = importlib.util.find_spec("yandex_mcp.__main__")
+        assert spec is not None
+
+    def test_cli_server_file_exposes_mcp_object(self):
+        """`server.py` should expose a top-level `mcp` object for `mcp dev/run` FILE_SPEC usage."""
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("yandex_mcp_cli_server", "server.py")
+        assert spec is not None and spec.loader is not None
+
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        assert hasattr(module, "mcp")
+
 
 class TestBiddingStrategies:
     """Test bidding strategy models and enums."""

@@ -81,6 +81,23 @@ Add to your MCP client settings:
 {
   "mcpServers": {
     "advertising_yandex_direct": {
+      "command": "/path/to/yandex-mcp/.venv/bin/python",
+      "args": ["server.py"],
+      "cwd": "/path/to/yandex-mcp",
+      "env": {
+        "YANDEX_TOKEN": "your_token"
+      }
+    }
+  }
+}
+```
+
+If you prefer a global Python interpreter instead of a project virtualenv:
+
+```json
+{
+  "mcpServers": {
+    "advertising_yandex_direct": {
       "command": "python",
       "args": ["-m", "yandex_mcp"],
       "cwd": "/path/to/yandex-mcp",

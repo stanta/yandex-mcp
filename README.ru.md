@@ -79,6 +79,23 @@ YANDEX_TOKEN=ваш_oauth_токен
 {
   "mcpServers": {
     "yandex": {
+      "command": "/path/to/yandex-mcp/.venv/bin/python",
+      "args": ["server.py"],
+      "cwd": "/path/to/yandex-mcp",
+      "env": {
+        "YANDEX_TOKEN": "your_token"
+      }
+    }
+  }
+}
+```
+
+Если вы используете глобальный Python вместо проектного virtualenv:
+
+```json
+{
+  "mcpServers": {
+    "yandex": {
       "command": "python",
       "args": ["-m", "yandex_mcp"],
       "cwd": "/path/to/yandex-mcp",

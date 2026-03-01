@@ -60,11 +60,20 @@ python -m yandex_mcp
 
 #### 1.2 Using mcp dev Command
 
-The `mcp dev` command starts an interactive development session:
+The `mcp dev` command starts an interactive development session.
+
+> Important: `mcp dev` expects a **Python file path** (`FILE_SPEC`), not a package name.
 
 ```bash
-# Start development mode with the yandex-mcp package
-mcp dev yandex-mcp
+# Start development mode for this project
+mcp dev server.py
+```
+
+If you run `mcp dev yandex-mcp`, MCP CLI treats `yandex-mcp` as a file path
+and fails with:
+
+```text
+File not found: .../yandex-mcp
 ```
 
 This will:
@@ -80,8 +89,8 @@ This will:
 Run the server and test specific tools:
 
 ```bash
-# Run with verbose output
-mcp run yandex-mcp --verbose
+# Run the server directly
+mcp run server.py
 ```
 
 ### Method 2: Direct Python Testing
@@ -114,11 +123,11 @@ if __name__ == "__main__":
 
 ### Method 3: Using the Inspector
 
-The MCP CLI includes an interactive inspector:
+The MCP Inspector is launched by `mcp dev`:
 
 ```bash
-# Start the inspector
-mcp inspect yandex-mcp
+# Start server + inspector
+mcp dev server.py
 ```
 
 This opens a web-based interface where you can:
@@ -132,7 +141,7 @@ This opens a web-based interface where you can:
 
 ```bash
 # Run the server and test specific Direct API tools
-mcp dev yandex-mcp
+mcp dev server.py
 
 # In the interactive prompt:
 > list tools
@@ -144,7 +153,7 @@ mcp dev yandex-mcp
 
 ```bash
 # Test Metrika tools
-mcp dev yandex-mcp
+mcp dev server.py
 
 # In the interactive prompt:
 > call get_counters
@@ -156,8 +165,8 @@ mcp dev yandex-mcp
 Check what the server provides:
 
 ```bash
-# Check server info
-mcp inspect yandex-mcp --json
+# Start inspector (tool/resource/prompt discovery happens there)
+mcp dev server.py
 ```
 
 Expected capabilities include:
@@ -176,10 +185,22 @@ If the `mcp` command is not found after installation:
 pip show mcp
 
 # Verify CLI is installed
-python -m mcp --help
+mcp --help
 
 # Or use directly
 python -c "from mcp.cli import main; main()"
+```
+
+### Issue: "File not found: .../yandex-mcp"
+
+This happens when `mcp dev` receives a package name instead of a file path.
+
+```bash
+# ✅ Correct
+mcp dev server.py
+
+# ❌ Incorrect for mcp dev/mcp run
+mcp dev yandex-mcp
 ```
 
 ### Issue: Server Won't Start
@@ -230,10 +251,10 @@ print(json.dumps(init_result, indent=2))
 
 | Command | Description |
 |---------|-------------|
-| `mcp dev <package>` | Start development mode |
-| `mcp run <package>` | Run and test tools |
-| `mcp inspect <package>` | Open web inspector |
-| `python -m mcp --help` | Show CLI help |
+| `mcp dev server.py` | Start development mode + inspector |
+| `mcp run server.py` | Run MCP server directly |
+| `mcp --help` | Show CLI help |
+| `python -m yandex_mcp` | Run this server module directly |
 
 ## Additional Resources
 
