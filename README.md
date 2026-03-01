@@ -80,7 +80,7 @@ Add to your MCP client settings:
 ```json
 {
   "mcpServers": {
-    "yandex": {
+    "advertising_yandex_direct": {
       "command": "python",
       "args": ["-m", "yandex_mcp"],
       "cwd": "/path/to/yandex-mcp",
