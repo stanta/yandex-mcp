@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io/)
 
-MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, and **Yandex Wordstat** APIs. Provides **163 tools** for managing advertising campaigns, analytics, keyword research, and reporting through any MCP-compatible client.
+MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, and **Yandex Wordstat** APIs. Provides **170 tools** for managing advertising campaigns, analytics, keyword research, and reporting through any MCP-compatible client.
 
 > Manage Yandex advertising and analytics through AI
 
@@ -100,6 +100,71 @@ Add to your MCP client settings:
 > What are the site stats for the last week?
 ```
 
+## Authentication Methods
+
+The Yandex MCP Server supports two authentication methods:
+
+### Method 1: Static Token (Simple)
+
+Use a pre-generated OAuth token directly in your environment variables. This is the quickest way to get started:
+
+```env
+YANDEX_TOKEN=your_oauth_token_here
+```
+
+Get a token from [Yandex OAuth](https://oauth.yandex.ru/) with permissions for Direct and Metrika APIs (`direct:api`, `metrika:read`, `metrika:write`).
+
+### Method 2: OAuth Authorization Code Flow (Recommended for Apps)
+
+For applications that need to manage tokens programmatically, use the OAuth flow with client credentials. This provides automatic token refresh and better security:
+
+```env
+YANDEX_CLIENT_ID=your_client_id
+YANDEX_CLIENT_SECRET=your_client_secret
+```
+
+#### Creating a Yandex OAuth Application
+
+1. Go to [https://oauth.yandex.ru/](https://oauth.yandex.ru/)
+2. Click "Register new application"
+3. Fill in the application details:
+   - **Name**: Yandex MCP Server
+   - **Description**: MCP server for Yandex Direct and Metrika
+   - **Platforms**: Select "Web" or "Desktop" depending on your use case
+4. Under "Permissions", select:
+   - `direct:api` — Yandex Direct API access
+   - `metrika:read` — Read access to Metrika statistics
+   - `metrika:write` — Write access to Metrika (if needed)
+5. Save the application
+6. Copy the **Client ID** and **Client Secret** to your `.env` file
+
+#### Using OAuth with MCP Tools
+
+Once configured with `YANDEX_CLIENT_ID` and `YDEX_CLIENT_SECRET`, use these tools to authenticate:
+
+**Web Authorization Flow:**
+```
+1. Call oauth_get_authorization_url to get the authorization URL
+2. Open the URL in a browser and grant access
+3. Copy the verification code from the redirect URL
+4. Call oauth_exchange_code with the code to get tokens
+```
+
+**Device Flow (for headless environments):**
+```
+1. Call oauth_get_device_code to get a device code
+2. Display the user_code and verification_url to the user
+3. Call oauth_poll_device_token to poll for the token
+4. Tokens will be automatically stored and refreshed
+```
+
+**Token Management:**
+- `oauth_check_token_status` — Check current token validity and expiration
+- `oauth_refresh_token` — Manually refresh an expired token
+- `oauth_revoke_token` — Remove stored tokens
+
+Tokens are securely stored in a local file and automatically refreshed when expired.
+
 ## Environment Variables
 
 | Variable | Required | Description |
@@ -109,8 +174,14 @@ Add to your MCP client settings:
 | `YANDEX_METRIKA_TOKEN` | No | Separate token for Metrika API |
 | `YANDEX_CLIENT_LOGIN` | No | Client login for agency accounts |
 | `YANDEX_USE_SANDBOX` | No | Set to `true` for sandbox API |
+| `YANDEX_CLIENT_ID` | No* | OAuth application ID (required for OAuth flow) |
+| `YANDEX_CLIENT_SECRET` | No* | OAuth application secret (required for OAuth flow) |
+| `YANDEX_OAUTH_REDIRECT_URI` | No | Redirect URI (default: https://oauth.yandex.com/verification_code) |
+| `YANDEX_OAUTH_SCOPES` | No | Comma-separated scopes (default: direct:api,metrika:read,metrika:write) |
 
-## Tools (160)
+*Either `YANDEX_TOKEN` or (`YANDEX_CLIENT_ID` + `YANDEX_CLIENT_SECRET`) is required.
+
+## Tools (170)
 
 ### Yandex Direct (115 tools)
 
@@ -460,6 +531,18 @@ Add to your MCP client settings:
 | `wordstat_regions_tree` | Get full hierarchical regions tree with IDs |
 | `wordstat_user_info` | Get API quota and usage limits |
 
+### OAuth Authentication (7 tools)
+
+| Tool | Description |
+|------|-------------|
+| `oauth_get_authorization_url` | Get authorization URL for web-based OAuth flow |
+| `oauth_exchange_code` | Exchange authorization code for access token |
+| `oauth_get_device_code` | Get device code for headless authentication |
+| `oauth_poll_device_token` | Poll for device token (for headless devices) |
+| `oauth_check_token_status` | Check token status and expiration |
+| `oauth_refresh_token` | Manually refresh expired token |
+| `oauth_revoke_token` | Remove stored token and revoke access |
+
 ## Usage Examples
 
 ### Campaign management
@@ -522,6 +605,8 @@ yandex_mcp/
 ├── __init__.py          # MCP server init and tool registration
 ├── client.py            # Async HTTP client for Direct, Metrika & Wordstat APIs
 ├── config.py            # Configuration and environment variables
+├── oauth.py             # OAuth client with authorization code and device flows
+├── token_storage.py     # Secure file-based token storage
 ├── utils.py             # Error handling utilities
 ├── models/              # Pydantic input models
 │   ├── common.py
@@ -535,6 +620,7 @@ yandex_mcp/
 │   ├── metrika.py
 │   └── wordstat.py
 └── tools/               # MCP tool definitions
+    ├── oauth.py         # OAuth authentication tools
     ├── direct/          # 105 Yandex Direct tools
     │   ├── _helpers.py  # Shared manage-operation factory
     │   ├── campaigns.py
