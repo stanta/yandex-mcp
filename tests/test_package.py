@@ -90,9 +90,10 @@ EXPECTED_DIRECT_TOOLS = [
     "direct_get_adextensions",
     "direct_add_callouts",
     "direct_link_callouts_to_ad",
-    # Videos & Creatives (6)
+    # Videos & Creatives (7)
     "direct_upload_video",
     "direct_get_advideos",
+    "direct_delete_advideos",
     "direct_create_video_creative",
     "direct_create_cpc_video_creative",
     "direct_create_cpm_video_creative",
@@ -809,3 +810,27 @@ class TestCreativesModels:
         assert input_data_filtered.creative_ids == [123, 456]
         assert input_data_filtered.types == ["CPC_VIDEO_CREATIVE", "CPM_VIDEO_CREATIVE"]
         assert input_data_filtered.limit == 50
+
+
+class TestAdVideosModels:
+    """Test AdVideos input models."""
+
+    def test_delete_advideos_input_model(self):
+        """Test DeleteAdVideosInput model."""
+        from yandex_mcp.tools.direct.advideos import DeleteAdVideosInput
+        
+        input_data = DeleteAdVideosInput(
+            video_ids=["abc123", "def456", "ghi789"]
+        )
+        assert input_data.video_ids == ["abc123", "def456", "ghi789"]
+        assert len(input_data.video_ids) == 3
+
+    def test_delete_advideos_input_single_id(self):
+        """Test DeleteAdVideosInput with single video ID."""
+        from yandex_mcp.tools.direct.advideos import DeleteAdVideosInput
+        
+        input_data = DeleteAdVideosInput(
+            video_ids=["single_video_id"]
+        )
+        assert input_data.video_ids == ["single_video_id"]
+        assert len(input_data.video_ids) == 1
