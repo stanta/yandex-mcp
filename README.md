@@ -6,13 +6,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io/)
 
-MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, and **Yandex Wordstat** APIs. Provides **140 tools** for managing advertising campaigns, analytics, keyword research, and reporting through any MCP-compatible client.
+MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, and **Yandex Wordstat** APIs. Provides **160 tools** for managing advertising campaigns, analytics, keyword research, and reporting through any MCP-compatible client.
 
 > Manage Yandex advertising and analytics through AI
 
 ## Features
 
-### Yandex Direct API v5 (105 tools)
+### Yandex Direct API v5 (112 tools)
 - **Campaigns** — create, update, pause, resume, archive, delete
 - **Ad Groups** — create, update, pause, resume, archive, unarchive with targeting settings
 - **Ads** — text, image, dynamic, shopping ads with moderation
@@ -28,6 +28,7 @@ MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, a
 - **Lead Forms** — lead generation form management
 - **Agency Clients** — agency sub-account management
 - **TurboPages** — fast-loading mobile landing pages
+- **VideoAds** — video ad campaigns (videos, groups, ads)
 - **Videos & Creatives** — video ad creation
 - **Dictionaries** — regions, interests, categories
 - **Negative Keywords** — shared negative keyword sets
@@ -109,9 +110,9 @@ Add to your MCP client settings:
 | `YANDEX_CLIENT_LOGIN` | No | Client login for agency accounts |
 | `YANDEX_USE_SANDBOX` | No | Set to `true` for sandbox API |
 
-## Tools (153)
+## Tools (160)
 
-### Yandex Direct (105 tools)
+### Yandex Direct (112 tools)
 
 #### Campaigns (8)
 
@@ -337,6 +338,18 @@ Add to your MCP client settings:
 | `direct_delete_turbo_pages` | Delete Turbo pages permanently |
 | `direct_get_turbo_page_templates` | Get available Turbo page templates |
 
+#### VideoAds (7)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_video_ad_videos` | Get video ad videos with status and metadata |
+| `direct_add_video_ad_videos` | Add video ad videos from URLs |
+| `direct_get_video_ad_groups` | Get video ad groups with targeting settings |
+| `direct_add_video_ad_groups` | Add video ad groups to campaigns |
+| `direct_update_video_ad_groups` | Update video ad group settings |
+| `direct_get_video_ads` | Get video ads with content and status |
+| `direct_add_video_ads` | Add video ads to video ad groups |
+
 ### Yandex Metrika (43 tools)
 
 #### Counters (5)
@@ -528,6 +541,7 @@ yandex_mcp/
     │   ├── lead_forms.py
     │   ├── agency_clients.py
     │   ├── turbo_pages.py
+    │   ├── video_ads.py
     │   └── ...
     ├── metrika/         # 43 Yandex Metrika tools
     │   ├── counters.py

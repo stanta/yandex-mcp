@@ -131,6 +131,14 @@ EXPECTED_DIRECT_TOOLS = [
     "direct_update_turbo_page",
     "direct_delete_turbo_pages",
     "direct_get_turbo_page_templates",
+    # VideoAds (7)
+    "direct_get_video_ad_videos",
+    "direct_add_video_ad_videos",
+    "direct_get_video_ad_groups",
+    "direct_add_video_ad_groups",
+    "direct_update_video_ad_groups",
+    "direct_get_video_ads",
+    "direct_add_video_ads",
 ]
 
 EXPECTED_METRIKA_TOOLS = [
@@ -911,3 +919,215 @@ class TestTurboPagesModels:
             turbo_page_ids=[111, 222, 333]
         )
         assert input_data.turbo_page_ids == [111, 222, 333]
+
+
+class TestVideoAdsModels:
+    """Test VideoAds models."""
+
+    def test_get_video_ad_videos_input_model(self):
+        """Test GetVideoAdVideosInput model."""
+        from yandex_mcp.models.direct_extended import GetVideoAdVideosInput
+        
+        input_data = GetVideoAdVideosInput(
+            video_ad_video_ids=[111, 222],
+            campaign_ids=[12345678],
+            limit=50,
+            offset=10
+        )
+        assert input_data.video_ad_video_ids == [111, 222]
+        assert input_data.campaign_ids == [12345678]
+        assert input_data.limit == 50
+        assert input_data.offset == 10
+
+    def test_get_video_ad_videos_input_defaults(self):
+        """Test GetVideoAdVideosInput with default values."""
+        from yandex_mcp.models.direct_extended import GetVideoAdVideosInput
+        
+        input_data = GetVideoAdVideosInput()
+        assert input_data.video_ad_video_ids is None
+        assert input_data.campaign_ids is None
+        assert input_data.limit == 100
+        assert input_data.offset == 0
+
+    def test_video_ad_video_input_model(self):
+        """Test VideoAdVideoInput model for creating."""
+        from yandex_mcp.models.direct_extended import VideoAdVideoInput
+        
+        input_data = VideoAdVideoInput(
+            name="My Video Ad",
+            video_url="https://example.com/video.mp4"
+        )
+        assert input_data.name == "My Video Ad"
+        assert input_data.video_url == "https://example.com/video.mp4"
+
+    def test_add_video_ad_videos_input_model(self):
+        """Test AddVideoAdVideosInput model."""
+        from yandex_mcp.models.direct_extended import AddVideoAdVideosInput, VideoAdVideoInput
+        
+        videos = [
+            VideoAdVideoInput(name="Video 1", video_url="https://example.com/v1.mp4"),
+            VideoAdVideoInput(name="Video 2", video_url="https://example.com/v2.mp4"),
+        ]
+        
+        input_data = AddVideoAdVideosInput(videos=videos)
+        assert len(input_data.videos) == 2
+        assert input_data.videos[0].name == "Video 1"
+        assert input_data.videos[1].name == "Video 2"
+
+    def test_get_video_ad_groups_input_model(self):
+        """Test GetVideoAdGroupsInput model."""
+        from yandex_mcp.models.direct_extended import GetVideoAdGroupsInput
+        
+        input_data = GetVideoAdGroupsInput(
+            video_ad_group_ids=[111, 222],
+            campaign_ids=[12345678],
+            limit=50,
+            offset=10
+        )
+        assert input_data.video_ad_group_ids == [111, 222]
+        assert input_data.campaign_ids == [12345678]
+        assert input_data.limit == 50
+        assert input_data.offset == 10
+
+    def test_video_ad_group_input_model(self):
+        """Test VideoAdGroupInput model."""
+        from yandex_mcp.models.direct_extended import VideoAdGroupInput
+        
+        input_data = VideoAdGroupInput(
+            campaign_id=12345678,
+            name="My Video Ad Group",
+            region_ids=[213, 107]
+        )
+        assert input_data.campaign_id == 12345678
+        assert input_data.name == "My Video Ad Group"
+        assert input_data.region_ids == [213, 107]
+
+    def test_add_video_ad_groups_input_model(self):
+        """Test AddVideoAdGroupsInput model."""
+        from yandex_mcp.models.direct_extended import AddVideoAdGroupsInput, VideoAdGroupInput
+        
+        ad_groups = [
+            VideoAdGroupInput(
+                campaign_id=12345678,
+                name="Video Ad Group 1",
+                region_ids=[213]
+            ),
+            VideoAdGroupInput(
+                campaign_id=12345678,
+                name="Video Ad Group 2",
+                region_ids=[107]
+            ),
+        ]
+        
+        input_data = AddVideoAdGroupsInput(ad_groups=ad_groups)
+        assert len(input_data.ad_groups) == 2
+        assert input_data.ad_groups[0].name == "Video Ad Group 1"
+        assert input_data.ad_groups[1].name == "Video Ad Group 2"
+
+    def test_update_video_ad_group_input_model(self):
+        """Test UpdateVideoAdGroupInput model."""
+        from yandex_mcp.models.direct_extended import UpdateVideoAdGroupInput
+        
+        input_data = UpdateVideoAdGroupInput(
+            video_ad_group_id=111,
+            name="Updated Group Name",
+            region_ids=[213, 107]
+        )
+        assert input_data.video_ad_group_id == 111
+        assert input_data.name == "Updated Group Name"
+        assert input_data.region_ids == [213, 107]
+
+    def test_update_video_ad_groups_input_model(self):
+        """Test UpdateVideoAdGroupsInput model."""
+        from yandex_mcp.models.direct_extended import UpdateVideoAdGroupsInput, UpdateVideoAdGroupInput
+        
+        ad_groups = [
+            UpdateVideoAdGroupInput(video_ad_group_id=111, name="Updated 1"),
+            UpdateVideoAdGroupInput(video_ad_group_id=222, region_ids=[213]),
+        ]
+        
+        input_data = UpdateVideoAdGroupsInput(ad_groups=ad_groups)
+        assert len(input_data.ad_groups) == 2
+        assert input_data.ad_groups[0].video_ad_group_id == 111
+        assert input_data.ad_groups[1].video_ad_group_id == 222
+
+    def test_get_video_ads_input_model(self):
+        """Test GetVideoAdsInput model."""
+        from yandex_mcp.models.direct_extended import GetVideoAdsInput
+        
+        input_data = GetVideoAdsInput(
+            video_ad_ids=[111, 222],
+            campaign_ids=[12345678],
+            ad_group_ids=[333, 444],
+            limit=50,
+            offset=10
+        )
+        assert input_data.video_ad_ids == [111, 222]
+        assert input_data.campaign_ids == [12345678]
+        assert input_data.ad_group_ids == [333, 444]
+        assert input_data.limit == 50
+        assert input_data.offset == 10
+
+    def test_video_ad_input_model(self):
+        """Test VideoAdInput model."""
+        from yandex_mcp.models.direct_extended import VideoAdInput
+        
+        input_data = VideoAdInput(
+            video_ad_group_id=111,
+            video_ad_video_id=222,
+            title="My Video Ad Title",
+            link_url="https://example.com/landing",
+            display_url="example.com",
+            vcard_id=333,
+            href_param="utm_source=yandex"
+        )
+        assert input_data.video_ad_group_id == 111
+        assert input_data.video_ad_video_id == 222
+        assert input_data.title == "My Video Ad Title"
+        assert input_data.link_url == "https://example.com/landing"
+        assert input_data.display_url == "example.com"
+        assert input_data.vcard_id == 333
+        assert input_data.href_param == "utm_source=yandex"
+
+    def test_video_ad_input_minimal(self):
+        """Test VideoAdInput with minimal required fields."""
+        from yandex_mcp.models.direct_extended import VideoAdInput
+        
+        input_data = VideoAdInput(
+            video_ad_group_id=111,
+            video_ad_video_id=222,
+            title="Minimal Video Ad",
+            link_url="https://example.com"
+        )
+        assert input_data.video_ad_group_id == 111
+        assert input_data.video_ad_video_id == 222
+        assert input_data.title == "Minimal Video Ad"
+        assert input_data.link_url == "https://example.com"
+        assert input_data.display_url is None
+        assert input_data.vcard_id is None
+        assert input_data.href_param is None
+
+    def test_add_video_ads_input_model(self):
+        """Test AddVideoAdsInput model."""
+        from yandex_mcp.models.direct_extended import AddVideoAdsInput, VideoAdInput
+        
+        ads = [
+            VideoAdInput(
+                video_ad_group_id=111,
+                video_ad_video_id=222,
+                title="Video Ad 1",
+                link_url="https://example.com/1"
+            ),
+            VideoAdInput(
+                video_ad_group_id=111,
+                video_ad_video_id=333,
+                title="Video Ad 2",
+                link_url="https://example.com/2",
+                display_url="example.com"
+            ),
+        ]
+        
+        input_data = AddVideoAdsInput(ads=ads)
+        assert len(input_data.ads) == 2
+        assert input_data.ads[0].title == "Video Ad 1"
+        assert input_data.ads[1].title == "Video Ad 2"

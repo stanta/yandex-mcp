@@ -735,3 +735,206 @@ class DeleteTurboPagesInput(BaseModel):
         min_length=1,
         description="Turbo page IDs to delete"
     )
+
+
+# =============================================================================
+# VideoAds Models
+# =============================================================================
+
+class GetVideoAdVideosInput(BaseModel):
+    """Input for getting video ad videos."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    video_ad_video_ids: Optional[List[int]] = Field(
+        default=None,
+        description="Filter by specific video ad video IDs"
+    )
+    campaign_ids: Optional[List[int]] = Field(
+        default=None,
+        description="Filter by campaign IDs"
+    )
+    limit: int = Field(
+        default=100,
+        ge=1,
+        le=10000,
+        description="Maximum number of videos to return"
+    )
+    offset: int = Field(
+        default=0,
+        ge=0,
+        description="Offset for pagination"
+    )
+    response_format: ResponseFormat = Field(
+        default=ResponseFormat.MARKDOWN,
+        description="Output format: 'markdown' or 'json'"
+    )
+
+
+class VideoAdVideoInput(BaseModel):
+    """Input model for creating a video ad video."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    name: str = Field(..., max_length=255, description="Video ad video name")
+    video_url: str = Field(..., max_length=1024, description="URL of the video file")
+
+
+class AddVideoAdVideosInput(BaseModel):
+    """Input for adding video ad videos."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    videos: List[VideoAdVideoInput] = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="List of video ad videos to add"
+    )
+
+
+class GetVideoAdGroupsInput(BaseModel):
+    """Input for getting video ad groups."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    video_ad_group_ids: Optional[List[int]] = Field(
+        default=None,
+        description="Filter by specific video ad group IDs"
+    )
+    campaign_ids: Optional[List[int]] = Field(
+        default=None,
+        description="Filter by campaign IDs"
+    )
+    limit: int = Field(
+        default=100,
+        ge=1,
+        le=10000,
+        description="Maximum number of ad groups to return"
+    )
+    offset: int = Field(
+        default=0,
+        ge=0,
+        description="Offset for pagination"
+    )
+    response_format: ResponseFormat = Field(
+        default=ResponseFormat.MARKDOWN,
+        description="Output format: 'markdown' or 'json'"
+    )
+
+
+class VideoAdGroupInput(BaseModel):
+    """Input model for creating or updating a video ad group."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    campaign_id: int = Field(..., description="Campaign ID")
+    name: str = Field(..., max_length=255, description="Video ad group name")
+    region_ids: Optional[List[int]] = Field(
+        default=None,
+        description="Region IDs for targeting"
+    )
+
+
+class AddVideoAdGroupsInput(BaseModel):
+    """Input for adding video ad groups."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    ad_groups: List[VideoAdGroupInput] = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="List of video ad groups to add"
+    )
+
+
+class UpdateVideoAdGroupInput(BaseModel):
+    """Input model for updating a video ad group."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    video_ad_group_id: int = Field(..., description="Video ad group ID to update")
+    name: Optional[str] = Field(
+        default=None,
+        max_length=255,
+        description="New video ad group name"
+    )
+    region_ids: Optional[List[int]] = Field(
+        default=None,
+        description="New region IDs for targeting"
+    )
+
+
+class UpdateVideoAdGroupsInput(BaseModel):
+    """Input for updating video ad groups."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    ad_groups: List[UpdateVideoAdGroupInput] = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="List of video ad groups to update"
+    )
+
+
+class GetVideoAdsInput(BaseModel):
+    """Input for getting video ads."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    video_ad_ids: Optional[List[int]] = Field(
+        default=None,
+        description="Filter by specific video ad IDs"
+    )
+    campaign_ids: Optional[List[int]] = Field(
+        default=None,
+        description="Filter by campaign IDs"
+    )
+    ad_group_ids: Optional[List[int]] = Field(
+        default=None,
+        description="Filter by ad group IDs"
+    )
+    limit: int = Field(
+        default=100,
+        ge=1,
+        le=10000,
+        description="Maximum number of ads to return"
+    )
+    offset: int = Field(
+        default=0,
+        ge=0,
+        description="Offset for pagination"
+    )
+    response_format: ResponseFormat = Field(
+        default=ResponseFormat.MARKDOWN,
+        description="Output format: 'markdown' or 'json'"
+    )
+
+
+class VideoAdInput(BaseModel):
+    """Input model for creating a video ad."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    video_ad_group_id: int = Field(..., description="Video ad group ID")
+    video_ad_video_id: int = Field(..., description="Video ad video ID")
+    title: str = Field(..., max_length=50, description="Ad title")
+    link_url: str = Field(..., max_length=1024, description="Click-through URL")
+    display_url: Optional[str] = Field(
+        default=None,
+        max_length=255,
+        description="Display URL"
+    )
+    vcard_id: Optional[int] = Field(
+        default=None,
+        description="vCard ID for contact info"
+    )
+    href_param: Optional[str] = Field(
+        default=None,
+        max_length=255,
+        description="HREF parameter for tracking"
+    )
+
+
+class AddVideoAdsInput(BaseModel):
+    """Input for adding video ads."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    ads: List[VideoAdInput] = Field(
+        ...,
+        min_length=1,
+        max_length=50,
+        description="List of video ads to add"
+    )
