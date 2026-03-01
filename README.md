@@ -116,7 +116,7 @@ Add to your MCP client settings:
 
 | Tool | Description |
 |------|-------------|
-| `direct_get_campaigns` | Get campaigns with status, strategy, and budget info |
+| `direct_get_campaigns` | Get campaigns with status, strategy, budget, wallet, notifications, and timezone info |
 | `direct_create_campaign` | Create a new campaign (search, network, or both) |
 | `direct_update_campaign` | Update campaign settings (strategy, budget, schedule, regions) |
 | `direct_suspend_campaigns` | Pause campaigns |

@@ -53,7 +53,7 @@ def register(mcp: FastMCP) -> None:
                 "FieldNames": [
                     "Id", "Name", "Type", "State", "Status", "StatusPayment",
                     "StartDate", "EndDate", "DailyBudget", "Statistics",
-                    "NegativeKeywords"
+                    "NegativeKeywords", "WalletId", "Notification", "TimeZone"
                 ],
                 "TextCampaignFieldNames": ["BiddingStrategy", "Settings"],
                 "Page": {
