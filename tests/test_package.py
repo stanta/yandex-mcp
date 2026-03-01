@@ -125,6 +125,12 @@ EXPECTED_DIRECT_TOOLS = [
     # Agency Clients (2)
     "direct_get_agency_clients",
     "direct_update_agency_client",
+    # TurboPages (5)
+    "direct_get_turbo_pages",
+    "direct_add_turbo_page",
+    "direct_update_turbo_page",
+    "direct_delete_turbo_pages",
+    "direct_get_turbo_page_templates",
 ]
 
 EXPECTED_METRIKA_TOOLS = [
@@ -834,3 +840,74 @@ class TestAdVideosModels:
         )
         assert input_data.video_ids == ["single_video_id"]
         assert len(input_data.video_ids) == 1
+
+
+class TestTurboPagesModels:
+    """Test TurboPages models."""
+
+    def test_get_turbo_pages_input_model(self):
+        """Test GetTurboPagesInput model."""
+        from yandex_mcp.models.direct_extended import GetTurboPagesInput
+        
+        input_data = GetTurboPagesInput(
+            turbo_page_ids=[111, 222],
+            limit=50,
+            offset=10
+        )
+        assert input_data.turbo_page_ids == [111, 222]
+        assert input_data.limit == 50
+        assert input_data.offset == 10
+
+    def test_get_turbo_pages_input_defaults(self):
+        """Test GetTurboPagesInput with default values."""
+        from yandex_mcp.models.direct_extended import GetTurboPagesInput
+        
+        input_data = GetTurboPagesInput()
+        assert input_data.turbo_page_ids is None
+        assert input_data.limit == 100
+        assert input_data.offset == 0
+
+    def test_turbo_page_input_model(self):
+        """Test TurboPageInput model for creating."""
+        from yandex_mcp.models.direct_extended import TurboPageInput
+        
+        input_data = TurboPageInput(
+            name="My Turbo Page",
+            url="https://example.com"
+        )
+        assert input_data.name == "My Turbo Page"
+        assert input_data.url == "https://example.com"
+        assert input_data.turbo_site_id is None
+
+    def test_turbo_page_input_with_turbo_site_id(self):
+        """Test TurboPageInput with turbo_site_id."""
+        from yandex_mcp.models.direct_extended import TurboPageInput
+        
+        input_data = TurboPageInput(
+            name="My Turbo Page",
+            url="https://example.com",
+            turbo_site_id=12345
+        )
+        assert input_data.turbo_site_id == 12345
+
+    def test_turbo_page_input_for_update(self):
+        """Test TurboPageInput model for updating."""
+        from yandex_mcp.models.direct_extended import TurboPageInput
+        
+        input_data = TurboPageInput(
+            name="Updated Page",
+            url="https://example.org",
+            turbo_page_ids=[111]
+        )
+        assert input_data.name == "Updated Page"
+        assert input_data.url == "https://example.org"
+        assert input_data.turbo_page_ids == [111]
+
+    def test_delete_turbo_pages_input_model(self):
+        """Test DeleteTurboPagesInput model."""
+        from yandex_mcp.models.direct_extended import DeleteTurboPagesInput
+        
+        input_data = DeleteTurboPagesInput(
+            turbo_page_ids=[111, 222, 333]
+        )
+        assert input_data.turbo_page_ids == [111, 222, 333]

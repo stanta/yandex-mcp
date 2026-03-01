@@ -27,6 +27,7 @@ def register_direct_tools(mcp: FastMCP) -> None:
         dynamic_text_ad_targets,
         lead_forms,
         agency_clients,
+        turbo_pages,
     )
 
     # Core tools
@@ -53,3 +54,4 @@ def register_direct_tools(mcp: FastMCP) -> None:
     dynamic_text_ad_targets.register(mcp)
     lead_forms.register(mcp)
     agency_clients.register(mcp)
+    turbo_pages.register(mcp)

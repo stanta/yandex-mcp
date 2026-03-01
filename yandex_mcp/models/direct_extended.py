@@ -682,3 +682,56 @@ class UpdateAgencyClientInput(BaseModel):
         default=None,
         description="Notification settings"
     )
+
+
+# =============================================================================
+# TurboPages Models
+# =============================================================================
+
+class TurboPageInput(BaseModel):
+    """Input model for creating or updating a Turbo page."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    name: str = Field(..., max_length=255, description="Turbo page name")
+    url: str = Field(..., max_length=1024, description="Original website URL for Turbo page")
+    turbo_site_id: Optional[int] = Field(default=None, description="Turbo site ID (required for creating)")
+    turbo_page_ids: Optional[List[int]] = Field(
+        default=None,
+        description="Turbo page IDs for update/delete operations"
+    )
+
+
+class GetTurboPagesInput(BaseModel):
+    """Input for getting Turbo pages."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    turbo_page_ids: Optional[List[int]] = Field(
+        default=None,
+        description="Filter by specific Turbo page IDs"
+    )
+    limit: int = Field(
+        default=100,
+        ge=1,
+        le=10000,
+        description="Maximum number of Turbo pages to return"
+    )
+    offset: int = Field(
+        default=0,
+        ge=0,
+        description="Offset for pagination"
+    )
+    response_format: ResponseFormat = Field(
+        default=ResponseFormat.MARKDOWN,
+        description="Output format: 'markdown' or 'json'"
+    )
+
+
+class DeleteTurboPagesInput(BaseModel):
+    """Input for deleting Turbo pages."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    turbo_page_ids: List[int] = Field(
+        ...,
+        min_length=1,
+        description="Turbo page IDs to delete"
+    )
