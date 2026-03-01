@@ -12,7 +12,7 @@ MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, a
 
 ## Features
 
-### Yandex Direct API v5 (95 tools)
+### Yandex Direct API v5 (97 tools)
 - **Campaigns** — create, update, pause, resume, archive, delete
 - **Ad Groups** — create, update, pause, resume, archive, unarchive with targeting settings
 - **Ads** — text, image, dynamic, shopping ads with moderation
@@ -26,6 +26,7 @@ MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, a
 - **Images** — upload, manage, and delete ad images
 - **Feeds** — product feed management
 - **Lead Forms** — lead generation form management
+- **Agency Clients** — agency sub-account management
 - **Videos & Creatives** — video ad creation
 - **Dictionaries** — regions, interests, categories
 - **Negative Keywords** — shared negative keyword sets
@@ -107,9 +108,9 @@ Add to your MCP client settings:
 | `YANDEX_CLIENT_LOGIN` | No | Client login for agency accounts |
 | `YANDEX_USE_SANDBOX` | No | Set to `true` for sandbox API |
 
-## Tools (143)
+## Tools (145)
 
-### Yandex Direct (95 tools)
+### Yandex Direct (97 tools)
 
 #### Campaigns (8)
 
@@ -310,6 +311,13 @@ Add to your MCP client settings:
 | `direct_delete_lead_forms` | Delete lead forms permanently |
 | `direct_get_lead_form_leads` | Get submissions/leads from lead forms |
 
+#### Agency Clients (2)
+
+| Tool | Description |
+|------|-------------|
+| `direct_get_agency_clients` | Get list of agency client accounts with status and permissions |
+| `direct_update_agency_client` | Update client account settings and notifications |
+
 ### Yandex Metrika (43 tools)
 
 #### Counters (5)
@@ -490,7 +498,7 @@ yandex_mcp/
 │   ├── metrika.py
 │   └── wordstat.py
 └── tools/               # MCP tool definitions
-    ├── direct/          # 95 Yandex Direct tools
+    ├── direct/          # 97 Yandex Direct tools
     │   ├── _helpers.py  # Shared manage-operation factory
     │   ├── campaigns.py
     │   ├── adgroups.py
@@ -499,6 +507,7 @@ yandex_mcp/
     │   ├── stats.py
     │   ├── images.py
     │   ├── lead_forms.py
+    │   ├── agency_clients.py
     │   └── ...
     ├── metrika/         # 43 Yandex Metrika tools
     │   ├── counters.py

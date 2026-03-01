@@ -599,3 +599,86 @@ class GetLeadFormLeadsInput(BaseModel):
     limit: int = Field(default=100, ge=1, le=10000, description="Maximum leads to return")
     offset: int = Field(default=0, ge=0, description="Offset for pagination")
     response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+
+# =============================================================================
+# AgencyClients Models
+# =============================================================================
+
+class GetAgencyClientsInput(BaseModel):
+    """Input for getting agency client accounts."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    logins: Optional[List[str]] = Field(
+        default=None,
+        description="Filter by client logins (usernames)"
+    )
+    status: Optional[List[str]] = Field(
+        default=None,
+        description="Filter by status: ALLOWED, SUSPENDED, BLOCKED, NONE"
+    )
+    limit: int = Field(
+        default=100,
+        ge=1,
+        le=10000,
+        description="Maximum number of clients to return"
+    )
+    offset: int = Field(
+        default=0,
+        ge=0,
+        description="Offset for pagination"
+    )
+    response_format: ResponseFormat = Field(
+        default=ResponseFormat.MARKDOWN,
+        description="Output format: 'markdown' or 'json'"
+    )
+
+
+class AgencyClientSettings(BaseModel):
+    """Settings for agency client."""
+    send_account_warnings: Optional[bool] = Field(
+        default=None,
+        description="Send account warnings to client"
+    )
+    send_notification_about_warnings: Optional[bool] = Field(
+        default=None,
+        description="Send notification about warnings"
+    )
+
+
+class AgencyClientNotification(BaseModel):
+    """Notification settings for agency client."""
+    email: Optional[str] = Field(
+        default=None,
+        description="Email for notifications"
+    )
+    email_balance: Optional[bool] = Field(
+        default=None,
+        description="Send balance notifications"
+    )
+    email_trade_offers: Optional[bool] = Field(
+        default=None,
+        description="Send trade offers notifications"
+    )
+    email_advertising_on_account: Optional[bool] = Field(
+        default=None,
+        description="Send advertising on account notifications"
+    )
+
+
+class UpdateAgencyClientInput(BaseModel):
+    """Input for updating an agency client."""
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    login: str = Field(
+        ...,
+        description="Client login (username) to update"
+    )
+    settings: Optional[AgencyClientSettings] = Field(
+        default=None,
+        description="Client settings"
+    )
+    notification: Optional[AgencyClientNotification] = Field(
+        default=None,
+        description="Notification settings"
+    )

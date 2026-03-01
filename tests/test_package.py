@@ -119,6 +119,9 @@ EXPECTED_DIRECT_TOOLS = [
     "direct_update_lead_form",
     "direct_delete_lead_forms",
     "direct_get_lead_form_leads",
+    # Agency Clients (2)
+    "direct_get_agency_clients",
+    "direct_update_agency_client",
 ]
 
 EXPECTED_METRIKA_TOOLS = [
@@ -637,3 +640,93 @@ class TestBidModifiersModels:
         assert len(input_data.regional_adjustments) == 1
         assert input_data.video_adjustment.bid_modifier == 150
         assert len(input_data.retargeting_adjustments) == 1
+
+
+class TestAgencyClientsModels:
+    """Test AgencyClients models."""
+
+    def test_get_agency_clients_input_model(self):
+        """Test GetAgencyClientsInput model."""
+        from yandex_mcp.models.direct_extended import GetAgencyClientsInput
+        
+        input_data = GetAgencyClientsInput(
+            logins=["client1", "client2"],
+            status=["ALLOWED", "SUSPENDED"],
+            limit=50,
+            offset=0
+        )
+        assert input_data.logins == ["client1", "client2"]
+        assert input_data.status == ["ALLOWED", "SUSPENDED"]
+        assert input_data.limit == 50
+        assert input_data.offset == 0
+
+    def test_get_agency_clients_input_defaults(self):
+        """Test GetAgencyClientsInput with default values."""
+        from yandex_mcp.models.direct_extended import GetAgencyClientsInput
+        
+        input_data = GetAgencyClientsInput()
+        assert input_data.logins is None
+        assert input_data.status is None
+        assert input_data.limit == 100
+        assert input_data.offset == 0
+
+    def test_agency_client_settings_model(self):
+        """Test AgencyClientSettings model."""
+        from yandex_mcp.models.direct_extended import AgencyClientSettings
+        
+        settings = AgencyClientSettings(
+            send_account_warnings=True,
+            send_notification_about_warnings=False
+        )
+        assert settings.send_account_warnings is True
+        assert settings.send_notification_about_warnings is False
+
+    def test_agency_client_notification_model(self):
+        """Test AgencyClientNotification model."""
+        from yandex_mcp.models.direct_extended import AgencyClientNotification
+        
+        notification = AgencyClientNotification(
+            email="client@example.com",
+            email_balance=True,
+            email_trade_offers=False,
+            email_advertising_on_account=True
+        )
+        assert notification.email == "client@example.com"
+        assert notification.email_balance is True
+        assert notification.email_trade_offers is False
+        assert notification.email_advertising_on_account is True
+
+    def test_update_agency_client_input_model(self):
+        """Test UpdateAgencyClientInput model."""
+        from yandex_mcp.models.direct_extended import (
+            UpdateAgencyClientInput,
+            AgencyClientSettings,
+            AgencyClientNotification
+        )
+        
+        input_data = UpdateAgencyClientInput(
+            login="client_login",
+            settings=AgencyClientSettings(
+                send_account_warnings=True
+            ),
+            notification=AgencyClientNotification(
+                email="client@example.com",
+                email_balance=True
+            )
+        )
+        assert input_data.login == "client_login"
+        assert input_data.settings is not None
+        assert input_data.settings.send_account_warnings is True
+        assert input_data.notification is not None
+        assert input_data.notification.email == "client@example.com"
+
+    def test_update_agency_client_input_login_only(self):
+        """Test UpdateAgencyClientInput with only login."""
+        from yandex_mcp.models.direct_extended import UpdateAgencyClientInput
+        
+        input_data = UpdateAgencyClientInput(
+            login="client_login"
+        )
+        assert input_data.login == "client_login"
+        assert input_data.settings is None
+        assert input_data.notification is None
