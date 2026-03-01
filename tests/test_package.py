@@ -86,9 +86,11 @@ EXPECTED_DIRECT_TOOLS = [
     "direct_add_negative_keyword_shared_set",
     "direct_update_negative_keyword_shared_set",
     "direct_delete_negative_keyword_shared_sets",
-    # Ad Extensions (3)
+    # Ad Extensions (5)
     "direct_get_adextensions",
     "direct_add_callouts",
+    "direct_update_adextensions",
+    "direct_delete_adextensions",
     "direct_link_callouts_to_ad",
     # Videos & Creatives (7)
     "direct_upload_video",
@@ -1131,3 +1133,62 @@ class TestVideoAdsModels:
         assert len(input_data.ads) == 2
         assert input_data.ads[0].title == "Video Ad 1"
         assert input_data.ads[1].title == "Video Ad 2"
+
+
+class TestAdExtensionsModels:
+    """Test AdExtensions input models."""
+
+    def test_update_callout_input_model(self):
+        """Test UpdateCalloutInput model."""
+        from yandex_mcp.tools.direct.adextensions import UpdateCalloutInput
+        
+        input_data = UpdateCalloutInput(
+            extension_id=12345,
+            callout_text="Updated callout text"
+        )
+        assert input_data.extension_id == 12345
+        assert input_data.callout_text == "Updated callout text"
+
+    def test_update_callout_input_validation(self):
+        """Test UpdateCalloutInput validation."""
+        from yandex_mcp.tools.direct.adextensions import UpdateCalloutInput
+        from pydantic import ValidationError
+        
+        # Test valid input with max length
+        input_data = UpdateCalloutInput(
+            extension_id=12345,
+            callout_text="a" * 25
+        )
+        assert len(input_data.callout_text) == 25
+        
+        # Test invalid - text too long
+        with pytest.raises(ValidationError):
+            UpdateCalloutInput(extension_id=12345, callout_text="a" * 26)
+
+    def test_delete_adextensions_input_model(self):
+        """Test DeleteAdExtensionsInput model."""
+        from yandex_mcp.tools.direct.adextensions import DeleteAdExtensionsInput
+        
+        input_data = DeleteAdExtensionsInput(
+            extension_ids=[111, 222, 333]
+        )
+        assert input_data.extension_ids == [111, 222, 333]
+        assert len(input_data.extension_ids) == 3
+
+    def test_delete_adextensions_input_single_id(self):
+        """Test DeleteAdExtensionsInput with single ID."""
+        from yandex_mcp.tools.direct.adextensions import DeleteAdExtensionsInput
+        
+        input_data = DeleteAdExtensionsInput(
+            extension_ids=[111]
+        )
+        assert input_data.extension_ids == [111]
+        assert len(input_data.extension_ids) == 1
+
+    def test_delete_adextensions_input_validation(self):
+        """Test DeleteAdExtensionsInput validation - must have at least 1 ID."""
+        from yandex_mcp.tools.direct.adextensions import DeleteAdExtensionsInput
+        from pydantic import ValidationError
+        
+        with pytest.raises(ValidationError):
+            DeleteAdExtensionsInput(extension_ids=[])

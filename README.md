@@ -252,12 +252,14 @@ Add to your MCP client settings:
 | `direct_update_negative_keyword_shared_set` | Update a negative keyword set |
 | `direct_delete_negative_keyword_shared_sets` | Delete negative keyword sets |
 
-#### Ad Extensions (3)
+#### Ad Extensions (5)
 
 | Tool | Description |
 |------|-------------|
 | `direct_get_adextensions` | Get ad extensions (callouts, etc.) |
 | `direct_add_callouts` | Add callout extensions |
+| `direct_update_adextensions` | Update callout extensions |
+| `direct_delete_adextensions` | Delete ad extensions |
 | `direct_link_callouts_to_ad` | Link callouts to an ad |
 
 #### Videos & Creatives (7)
