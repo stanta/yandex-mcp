@@ -153,7 +153,7 @@ def register(mcp: FastMCP) -> None:
         except Exception as e:
             return handle_api_error(e)
 
-    for action in ("suspend", "resume", "delete"):
+    for action in ("suspend", "resume", "archive", "unarchive", "delete"):
         register_manage_tool(
             mcp,
             service="keywords",

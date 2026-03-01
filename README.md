@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-compatible-green.svg)](https://modelcontextprotocol.io/)
 
-MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, and **Yandex Wordstat** APIs. Provides **161 tools** for managing advertising campaigns, analytics, keyword research, and reporting through any MCP-compatible client.
+MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, and **Yandex Wordstat** APIs. Provides **163 tools** for managing advertising campaigns, analytics, keyword research, and reporting through any MCP-compatible client.
 
 > Manage Yandex advertising and analytics through AI
 
@@ -112,7 +112,7 @@ Add to your MCP client settings:
 
 ## Tools (160)
 
-### Yandex Direct (113 tools)
+### Yandex Direct (115 tools)
 
 #### Campaigns (8)
 
@@ -165,7 +165,7 @@ Add to your MCP client settings:
 | `direct_unarchive_ads` | Restore archived ads |
 | `direct_delete_ads` | Delete ads permanently |
 
-#### Keywords (6)
+#### Keywords (8)
 
 | Tool | Description |
 |------|-------------|
@@ -174,6 +174,8 @@ Add to your MCP client settings:
 | `direct_set_keyword_bids` | Set search and network bids |
 | `direct_suspend_keywords` | Pause keywords |
 | `direct_resume_keywords` | Resume paused keywords |
+| `direct_archive_keywords` | Archive keywords |
+| `direct_unarchive_keywords` | Restore archived keywords |
 | `direct_delete_keywords` | Delete keywords permanently |
 
 #### Statistics (1)

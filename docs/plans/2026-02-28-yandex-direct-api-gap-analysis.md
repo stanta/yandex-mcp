@@ -46,7 +46,7 @@ The following table lists currently implemented API service surfaces with status
 | 1 | Campaigns | `yandex_mcp/tools/direct/campaigns.py` | ⚠️ Partial | get, create, update, suspend, resume, archive, unarchive, delete |
 | 2 | AdGroups | `yandex_mcp/tools/direct/adgroups.py` | ⚠️ Partial | get, create, update |
 | 3 | Ads | `yandex_mcp/tools/direct/ads.py` | ✅ Complete | get, create, update, moderate, suspend, resume, archive, unarchive, delete |
-| 4 | Keywords | `yandex_mcp/tools/direct/keywords.py` | ⚠️ Partial | get, add, set bids, suspend, resume, delete |
+| 4 | Keywords | `yandex_mcp/tools/direct/keywords.py` | ✅ Complete | get, add, set bids, suspend, resume, archive, unarchive, delete |
 | 5 | BidModifiers | `yandex_mcp/tools/direct/bidmodifiers.py` | ⚠️ Partial | get, add, set, delete, toggle |
 | 6 | Sitelinks | `yandex_mcp/tools/direct/sitelinks.py` | ✅ Complete | get, add, delete |
 | 7 | VCards | `yandex_mcp/tools/direct/vcards.py` | ✅ Complete | get, add, delete |

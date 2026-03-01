@@ -34,12 +34,14 @@ EXPECTED_DIRECT_TOOLS = [
     "direct_archive_ads",
     "direct_unarchive_ads",
     "direct_delete_ads",
-    # Keywords (6)
+    # Keywords (8)
     "direct_get_keywords",
     "direct_add_keywords",
     "direct_set_keyword_bids",
     "direct_suspend_keywords",
     "direct_resume_keywords",
+    "direct_archive_keywords",
+    "direct_unarchive_keywords",
     "direct_delete_keywords",
     # Statistics (1)
     "direct_get_statistics",
