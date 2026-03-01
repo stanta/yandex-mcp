@@ -18,7 +18,7 @@ MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, a
 - **Ads** — text, image, dynamic, shopping ads with moderation
 - **Keywords** — manage keywords and bids
 - **Statistics** — detailed performance reports with async retry
-- **Bid Modifiers** — mobile, desktop, demographics, regional adjustments
+- **Bid Modifiers** — mobile, desktop, demographics, regional, video, and retargeting adjustments
 - **Retargeting** — retargeting lists and audience targets
 - **Smart Ad Targets** — feed-based targeting filters
 - **Dynamic Text Ad Targets** — autotargeting for dynamic text ads
@@ -183,8 +183,8 @@ Add to your MCP client settings:
 
 | Tool | Description |
 |------|-------------|
-| `direct_get_bid_modifiers` | Get bid modifiers (mobile, desktop, demographics, regional) |
-| `direct_add_bid_modifier` | Add a bid modifier to campaign or ad group |
+| `direct_get_bid_modifiers` | Get bid modifiers (mobile, desktop, demographics, regional, video, retargeting) |
+| `direct_add_bid_modifier` | Add a bid modifier (mobile, desktop, demographics, regional, video, or retargeting) |
 | `direct_set_bid_modifier` | Set bid modifier value (0-1300%) |
 | `direct_delete_bid_modifiers` | Delete bid modifiers |
 | `direct_toggle_bid_modifiers` | Enable or disable bid modifiers |

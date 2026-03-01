@@ -184,6 +184,18 @@ class RegionalAdjustment(BaseModel):
     bid_modifier: int = Field(..., ge=10, le=1300, description="Bid modifier percent (10-1300)")
 
 
+class VideoAdjustment(BaseModel):
+    """Video bid adjustment for video ad campaigns."""
+    bid_modifier: int = Field(..., ge=0, le=1300, description="Bid modifier percent (0-1300, 100=no change)")
+
+
+class RetargetingAdjustment(BaseModel):
+    """Retargeting list bid adjustment."""
+    retargeting_list_id: int = Field(..., description="Retargeting list ID")
+    bid_modifier: int = Field(..., ge=0, le=1300, description="Bid modifier percent (0-1300)")
+    enabled: bool = Field(default=True, description="Whether the adjustment is enabled")
+
+
 class AddBidModifierInput(BaseModel):
     """Input for adding bid modifiers."""
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
@@ -195,6 +207,8 @@ class AddBidModifierInput(BaseModel):
     desktop_adjustment: Optional[DesktopAdjustment] = Field(default=None, description="Desktop adjustment")
     demographics_adjustments: Optional[List[DemographicsAdjustment]] = Field(default=None, description="Demographics adjustments")
     regional_adjustments: Optional[List[RegionalAdjustment]] = Field(default=None, description="Regional adjustments")
+    video_adjustment: Optional[VideoAdjustment] = Field(default=None, description="Video ad campaign adjustment")
+    retargeting_adjustments: Optional[List[RetargetingAdjustment]] = Field(default=None, description="Retargeting list adjustments")
 
 
 class SetBidModifierInput(BaseModel):

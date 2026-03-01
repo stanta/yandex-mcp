@@ -35,8 +35,8 @@ def register(mcp: FastMCP) -> None:
         - Device type (mobile/desktop)
         - Demographics (age, gender)
         - Geography (regions)
+        - Video ad campaigns
         - Retargeting lists
-        - Video additions
         """
         try:
             selection_criteria = {}
@@ -67,6 +67,8 @@ def register(mcp: FastMCP) -> None:
                 "DesktopAdjustmentFieldNames": ["BidModifier"],
                 "DemographicsAdjustmentFieldNames": ["Gender", "Age", "BidModifier", "Enabled"],
                 "RegionalAdjustmentFieldNames": ["RegionId", "BidModifier", "Enabled"],
+                "VideoAdjustmentFieldNames": ["BidModifier"],
+                "RetargetingAdjustmentFieldNames": ["RetargetingListId", "BidModifier", "Enabled"],
                 "Page": {"Limit": params.limit}
             }
 
@@ -97,6 +99,13 @@ def register(mcp: FastMCP) -> None:
                 if bm.get('RegionalAdjustment'):
                     ra = bm['RegionalAdjustment']
                     lines.append(f"- **Region {ra.get('RegionId')}**: {ra.get('BidModifier', 0)}%")
+                if bm.get('VideoAdjustment'):
+                    va = bm['VideoAdjustment']
+                    lines.append(f"- **Video**: {va.get('BidModifier', 0)}%")
+                if bm.get('RetargetingAdjustments'):
+                    for rta in bm['RetargetingAdjustments']:
+                        enabled = "enabled" if rta.get("Enabled") == "YES" else "disabled"
+                        lines.append(f"- **Retargeting List {rta.get('RetargetingListId')}**: {rta.get('BidModifier', 0)}% ({enabled})")
                 lines.append("")
 
             return "\n".join(lines)
@@ -123,6 +132,14 @@ def register(mcp: FastMCP) -> None:
         - 100 = no change
         - 150 = increase bid by 50%
         - 1300 = maximum (13x increase)
+
+        Supported adjustment types:
+        - Mobile adjustment: for mobile device traffic
+        - Desktop adjustment: for desktop traffic
+        - Demographics: for age/gender targeting
+        - Regional: for geographic targeting
+        - Video: for video ad campaigns
+        - Retargeting: for retargeting lists
         """
         try:
             bid_modifier = {}
@@ -156,6 +173,18 @@ def register(mcp: FastMCP) -> None:
                         "RegionId": ra.region_id,
                         "BidModifier": ra.bid_modifier
                     } for ra in params.regional_adjustments
+                ]
+            if params.video_adjustment:
+                bid_modifier["VideoAdjustment"] = {
+                    "BidModifier": params.video_adjustment.bid_modifier
+                }
+            if params.retargeting_adjustments:
+                bid_modifier["RetargetingAdjustments"] = [
+                    {
+                        "RetargetingListId": ra.retargeting_list_id,
+                        "BidModifier": ra.bid_modifier,
+                        "Enabled": "YES" if ra.enabled else "NO"
+                    } for ra in params.retargeting_adjustments
                 ]
 
             request_params = {

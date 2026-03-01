@@ -510,3 +510,130 @@ class TestLeadFormsModels:
             form_ids=[111, 222, 333]
         )
         assert input_data.form_ids == [111, 222, 333]
+
+
+class TestBidModifiersModels:
+    """Test BidModifiers models including Video and Retargeting adjustments."""
+
+    def test_video_adjustment_model(self):
+        """Test VideoAdjustment model."""
+        from yandex_mcp.models.direct_extended import VideoAdjustment
+        
+        # Test valid bid modifier
+        adjustment = VideoAdjustment(bid_modifier=150)
+        assert adjustment.bid_modifier == 150
+        
+        # Test minimum value (0 = disable)
+        adjustment_min = VideoAdjustment(bid_modifier=0)
+        assert adjustment_min.bid_modifier == 0
+        
+        # Test maximum value (1300 = 13x)
+        adjustment_max = VideoAdjustment(bid_modifier=1300)
+        assert adjustment_max.bid_modifier == 1300
+
+    def test_video_adjustment_validation(self):
+        """Test VideoAdjustment validation."""
+        from yandex_mcp.models.direct_extended import VideoAdjustment
+        from pydantic import ValidationError
+        
+        # Test invalid - too low
+        with pytest.raises(ValidationError):
+            VideoAdjustment(bid_modifier=-1)
+        
+        # Test invalid - too high
+        with pytest.raises(ValidationError):
+            VideoAdjustment(bid_modifier=1301)
+
+    def test_retargeting_adjustment_model(self):
+        """Test RetargetingAdjustment model."""
+        from yandex_mcp.models.direct_extended import RetargetingAdjustment
+        
+        # Test with enabled=True (default)
+        adjustment = RetargetingAdjustment(
+            retargeting_list_id=12345,
+            bid_modifier=120
+        )
+        assert adjustment.retargeting_list_id == 12345
+        assert adjustment.bid_modifier == 120
+        assert adjustment.enabled is True
+        
+        # Test with enabled=False
+        adjustment_disabled = RetargetingAdjustment(
+            retargeting_list_id=67890,
+            bid_modifier=100,
+            enabled=False
+        )
+        assert adjustment_disabled.enabled is False
+
+    def test_retargeting_adjustment_validation(self):
+        """Test RetargetingAdjustment validation."""
+        from yandex_mcp.models.direct_extended import RetargetingAdjustment
+        from pydantic import ValidationError
+        
+        # Test invalid - too low
+        with pytest.raises(ValidationError):
+            RetargetingAdjustment(retargeting_list_id=123, bid_modifier=-1)
+        
+        # Test invalid - too high
+        with pytest.raises(ValidationError):
+            RetargetingAdjustment(retargeting_list_id=123, bid_modifier=1301)
+
+    def test_add_bid_modifier_with_video_adjustment(self):
+        """Test AddBidModifierInput with video adjustment."""
+        from yandex_mcp.models.direct_extended import AddBidModifierInput, VideoAdjustment
+        
+        input_data = AddBidModifierInput(
+            campaign_id=12345678,
+            video_adjustment=VideoAdjustment(bid_modifier=150)
+        )
+        assert input_data.campaign_id == 12345678
+        assert input_data.video_adjustment is not None
+        assert input_data.video_adjustment.bid_modifier == 150
+
+    def test_add_bid_modifier_with_retargeting_adjustments(self):
+        """Test AddBidModifierInput with retargeting adjustments."""
+        from yandex_mcp.models.direct_extended import AddBidModifierInput, RetargetingAdjustment
+        
+        input_data = AddBidModifierInput(
+            campaign_id=12345678,
+            retargeting_adjustments=[
+                RetargetingAdjustment(retargeting_list_id=111, bid_modifier=120),
+                RetargetingAdjustment(retargeting_list_id=222, bid_modifier=80, enabled=False),
+            ]
+        )
+        assert input_data.campaign_id == 12345678
+        assert len(input_data.retargeting_adjustments) == 2
+        assert input_data.retargeting_adjustments[0].bid_modifier == 120
+        assert input_data.retargeting_adjustments[1].enabled is False
+
+    def test_add_bid_modifier_with_all_adjustment_types(self):
+        """Test AddBidModifierInput with all adjustment types."""
+        from yandex_mcp.models.direct_extended import (
+            AddBidModifierInput, MobileAdjustment, DesktopAdjustment,
+            DemographicsAdjustment, RegionalAdjustment, VideoAdjustment,
+            RetargetingAdjustment
+        )
+        
+        input_data = AddBidModifierInput(
+            campaign_id=12345678,
+            mobile_adjustment=MobileAdjustment(bid_modifier=120),
+            desktop_adjustment=DesktopAdjustment(bid_modifier=100),
+            demographics_adjustments=[
+                DemographicsAdjustment(gender="GENDER_MALE", age="AGE_25_34", bid_modifier=110)
+            ],
+            regional_adjustments=[
+                RegionalAdjustment(region_id=213, bid_modifier=130)
+            ],
+            video_adjustment=VideoAdjustment(bid_modifier=150),
+            retargeting_adjustments=[
+                RetargetingAdjustment(retargeting_list_id=123, bid_modifier=140)
+            ]
+        )
+        
+        assert input_data.campaign_id == 12345678
+        assert input_data.mobile_adjustment.bid_modifier == 120
+        assert input_data.desktop_adjustment.bid_modifier == 100
+        assert len(input_data.demographics_adjustments) == 1
+        assert len(input_data.regional_adjustments) == 1
+        assert input_data.video_adjustment.bid_modifier == 150
+        assert len(input_data.retargeting_adjustments) == 1
