@@ -259,7 +259,7 @@ Once connected, you can use natural language commands:
 
 **Files to create**:
 
-- [`examples/openclaw-config.json`](examples/openclaw-config.json:1)
+- [`docs/examples/openclaw-config.json`](docs/examples/openclaw-config.json:1)
 
 ### Phase 3: Testing & Validation
 

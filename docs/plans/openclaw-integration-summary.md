@@ -124,7 +124,7 @@ To connect to OpenClaw, the server needs:
 ## Next Steps
 
 1. Review the detailed plan in [`openclaw-integration-plan.md`](openclaw-integration-plan.md:1)
-2. Test configuration using examples in [`examples/`](examples/)
+2. Test configuration using examples in [`docs/examples/`](docs/examples/)
 3. Follow quick start guide in [`docs/openclaw-quickstart.md`](docs/openclaw-quickstart.md:1)
 4. Implement Phase 1 changes (PyPI support, documentation)
 

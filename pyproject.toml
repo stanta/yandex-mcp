@@ -39,7 +39,7 @@ dev = [
 ]
 
 [project.scripts]
-yandex-mcp = "yandex_mcp:mcp.run"
+yandex-mcp = "server:main"
 
 [build-system]
 requires = ["hatchling"]

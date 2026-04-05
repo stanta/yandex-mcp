@@ -13,6 +13,7 @@ MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, a
 ## Features
 
 ### Yandex Direct API v5 (113 tools)
+
 - **Campaigns** — create, update, pause, resume, archive, delete
 - **Ad Groups** — create, update, pause, resume, archive, unarchive with targeting settings
 - **Ads** — text, image, dynamic, shopping ads with moderation
@@ -34,6 +35,7 @@ MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, a
 - **Negative Keywords** — shared negative keyword sets
 
 ### Yandex Wordstat API (5 tools)
+
 - **Top Requests** — popular search queries and associations
 - **Dynamics** — query frequency trends over time
 - **Regions** — regional distribution of search queries
@@ -41,6 +43,7 @@ MCP (Model Context Protocol) server for **Yandex Direct**, **Yandex Metrika**, a
 - **User Info** — API quota and usage limits
 
 ### Yandex Metrika API (43 tools)
+
 - **Counters** — create, configure, delete tracking counters
 - **Goals** — conversion goal management
 - **Reports** — analytics with custom metrics, time series, comparisons, drill-down
@@ -117,6 +120,144 @@ If you prefer a global Python interpreter instead of a project virtualenv:
 > What are the site stats for the last week?
 ```
 
+## OpenClaw Integration
+
+The Yandex MCP Server can be integrated with [OpenClaw](https://openclaw.ai/) to manage your Yandex advertising through AI agents on channels like WhatsApp, Telegram, Slack, and others.
+
+### Option 1: Using pip (Recommended)
+
+```bash
+pip install yandex-mcp
+```
+
+Then add to `~/.openclaw/openclaw.json`:
+
+```json
+{
+  "mcpServers": {
+    "yandex-direct": {
+      "command": "yandex-mcp"
+    }
+  }
+}
+```
+
+Or with explicit Python:
+
+```json
+{
+  "mcpServers": {
+    "yandex-direct": {
+      "command": "python",
+      "args": ["-m", "yandex_mcp"]
+    }
+  }
+}
+```
+
+### Option 2: Using uvx (No Installation)
+
+```json
+{
+  "mcpServers": {
+    "yandex-direct": {
+      "command": "uvx",
+      "args": ["yandex-mcp"]
+    }
+  }
+}
+```
+
+### Option 3: From Source
+
+```bash
+cd /path/to/yandex-mcp
+pip install -e .
+```
+
+Then configure:
+
+```json
+{
+  "mcpServers": {
+    "yandex-direct": {
+      "command": "python",
+      "args": ["server.py"],
+      "cwd": "/path/to/yandex-mcp"
+    }
+  }
+}
+```
+
+### Environment Variables
+
+Add environment variables to your OpenClaw config:
+
+```json
+{
+  "mcpServers": {
+    "yandex-direct": {
+      "command": "yandex-mcp",
+      "env": {
+        "YANDEX_TOKEN": "your_oauth_token"
+      }
+    }
+  }
+}
+```
+
+Or use OAuth flow for automatic token refresh:
+
+```json
+{
+  "mcpServers": {
+    "yandex-direct": {
+      "command": "yandex-mcp",
+      "env": {
+        "YANDEX_CLIENT_ID": "your_client_id",
+        "YANDEX_CLIENT_SECRET": "your_client_secret"
+      }
+    }
+  }
+}
+```
+
+### SSE Transport (Remote Deployment)
+
+For remote OpenClaw deployments, use SSE transport:
+
+1. Start the server:
+
+   ```bash
+   yandex-mcp --transport sse --port 3000
+   ```
+
+2. Configure OpenClaw:
+   ```json
+   {
+     "mcpServers": {
+       "yandex-direct": {
+         "url": "http://localhost:3000/sse",
+         "transport": "http"
+       }
+     }
+   }
+   ```
+
+### Verification
+
+After configuration, verify the connection:
+
+```bash
+openclaw mcp list
+# Should show: yandex-direct
+
+openclaw mcp show yandex-direct --json
+# Should show all 170 tools
+```
+
+For more details, see the [OpenClaw Quick Start Guide](docs/openclaw-quickstart.md).
+
 ## Authentication Methods
 
 The Yandex MCP Server supports two authentication methods:
@@ -160,6 +301,7 @@ YANDEX_CLIENT_SECRET=your_client_secret
 Once configured with `YANDEX_CLIENT_ID` and `YDEX_CLIENT_SECRET`, use these tools to authenticate:
 
 **Web Authorization Flow:**
+
 ```
 1. Call oauth_get_authorization_url to get the authorization URL
 2. Open the URL in a browser and grant access
@@ -168,6 +310,7 @@ Once configured with `YANDEX_CLIENT_ID` and `YDEX_CLIENT_SECRET`, use these tool
 ```
 
 **Device Flow (for headless environments):**
+
 ```
 1. Call oauth_get_device_code to get a device code
 2. Display the user_code and verification_url to the user
@@ -176,6 +319,7 @@ Once configured with `YANDEX_CLIENT_ID` and `YDEX_CLIENT_SECRET`, use these tool
 ```
 
 **Token Management:**
+
 - `oauth_check_token_status` — Check current token validity and expiration
 - `oauth_refresh_token` — Manually refresh an expired token
 - `oauth_revoke_token` — Remove stored tokens
@@ -184,19 +328,19 @@ Tokens are securely stored in a local file and automatically refreshed when expi
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `YANDEX_TOKEN` | Yes | Yandex OAuth token (used for both Direct and Metrika) |
-| `YANDEX_DIRECT_TOKEN` | No | Separate token for Direct API |
-| `YANDEX_METRIKA_TOKEN` | No | Separate token for Metrika API |
-| `YANDEX_CLIENT_LOGIN` | No | Client login for agency accounts |
-| `YANDEX_USE_SANDBOX` | No | Set to `true` for sandbox API |
-| `YANDEX_CLIENT_ID` | No* | OAuth application ID (required for OAuth flow) |
-| `YANDEX_CLIENT_SECRET` | No* | OAuth application secret (required for OAuth flow) |
-| `YANDEX_OAUTH_REDIRECT_URI` | No | Redirect URI (default: https://oauth.yandex.com/verification_code) |
-| `YANDEX_OAUTH_SCOPES` | No | Comma-separated scopes (default: direct:api,metrika:read,metrika:write) |
+| Variable                    | Required | Description                                                             |
+| --------------------------- | -------- | ----------------------------------------------------------------------- |
+| `YANDEX_TOKEN`              | Yes      | Yandex OAuth token (used for both Direct and Metrika)                   |
+| `YANDEX_DIRECT_TOKEN`       | No       | Separate token for Direct API                                           |
+| `YANDEX_METRIKA_TOKEN`      | No       | Separate token for Metrika API                                          |
+| `YANDEX_CLIENT_LOGIN`       | No       | Client login for agency accounts                                        |
+| `YANDEX_USE_SANDBOX`        | No       | Set to `true` for sandbox API                                           |
+| `YANDEX_CLIENT_ID`          | No\*     | OAuth application ID (required for OAuth flow)                          |
+| `YANDEX_CLIENT_SECRET`      | No\*     | OAuth application secret (required for OAuth flow)                      |
+| `YANDEX_OAUTH_REDIRECT_URI` | No       | Redirect URI (default: https://oauth.yandex.com/verification_code)      |
+| `YANDEX_OAUTH_SCOPES`       | No       | Comma-separated scopes (default: direct:api,metrika:read,metrika:write) |
 
-*Either `YANDEX_TOKEN` or (`YANDEX_CLIENT_ID` + `YANDEX_CLIENT_SECRET`) is required.
+\*Either `YANDEX_TOKEN` or (`YANDEX_CLIENT_ID` + `YANDEX_CLIENT_SECRET`) is required.
 
 ## Tools (170)
 
@@ -204,18 +348,19 @@ Tokens are securely stored in a local file and automatically refreshed when expi
 
 #### Campaigns (8)
 
-| Tool | Description |
-|------|-------------|
-| `direct_get_campaigns` | Get campaigns with status, strategy, budget, wallet, notifications, and timezone info |
-| `direct_create_campaign` | Create a new campaign (search, network, or both) |
-| `direct_update_campaign` | Update campaign settings (strategy, budget, schedule, regions) |
-| `direct_suspend_campaigns` | Pause campaigns |
-| `direct_resume_campaigns` | Resume paused campaigns |
-| `direct_archive_campaigns` | Archive campaigns |
-| `direct_unarchive_campaigns` | Restore archived campaigns |
-| `direct_delete_campaigns` | Delete campaigns permanently |
+| Tool                         | Description                                                                           |
+| ---------------------------- | ------------------------------------------------------------------------------------- |
+| `direct_get_campaigns`       | Get campaigns with status, strategy, budget, wallet, notifications, and timezone info |
+| `direct_create_campaign`     | Create a new campaign (search, network, or both)                                      |
+| `direct_update_campaign`     | Update campaign settings (strategy, budget, schedule, regions)                        |
+| `direct_suspend_campaigns`   | Pause campaigns                                                                       |
+| `direct_resume_campaigns`    | Resume paused campaigns                                                               |
+| `direct_archive_campaigns`   | Archive campaigns                                                                     |
+| `direct_unarchive_campaigns` | Restore archived campaigns                                                            |
+| `direct_delete_campaigns`    | Delete campaigns permanently                                                          |
 
 **Supported Bidding Strategies:**
+
 - `WB_MAXIMUM_CLICKS` — Maximize clicks within budget
 - `AVERAGE_CPC` — Average CPC strategy
 - `AVERAGE_CPA` — Target average CPA (requires goal_id)
@@ -226,343 +371,345 @@ Tokens are securely stored in a local file and automatically refreshed when expi
 
 #### Ad Groups (7)
 
-| Tool | Description |
-|------|-------------|
-| `direct_get_adgroups` | Get ad groups with targeting settings |
-| `direct_create_adgroup` | Create a new ad group in a campaign |
-| `direct_update_adgroup` | Update ad group settings and targeting |
-| `direct_suspend_adgroups` | Pause ad groups |
-| `direct_resume_adgroups` | Resume paused ad groups |
-| `direct_archive_adgroups` | Archive ad groups |
-| `direct_unarchive_adgroups` | Restore archived ad groups |
+| Tool                        | Description                            |
+| --------------------------- | -------------------------------------- |
+| `direct_get_adgroups`       | Get ad groups with targeting settings  |
+| `direct_create_adgroup`     | Create a new ad group in a campaign    |
+| `direct_update_adgroup`     | Update ad group settings and targeting |
+| `direct_suspend_adgroups`   | Pause ad groups                        |
+| `direct_resume_adgroups`    | Resume paused ad groups                |
+| `direct_archive_adgroups`   | Archive ad groups                      |
+| `direct_unarchive_adgroups` | Restore archived ad groups             |
 
 #### Ads (12)
 
-| Tool | Description |
-|------|-------------|
-| `direct_get_ads` | Get ads with content and moderation status |
-| `direct_create_text_ad` | Create a text ad with title, text, and URL |
-| `direct_create_image_ad` | Create an image ad (banner) |
-| `direct_create_dynamic_ad` | Create a dynamic text ad from feed data |
+| Tool                        | Description                                    |
+| --------------------------- | ---------------------------------------------- |
+| `direct_get_ads`            | Get ads with content and moderation status     |
+| `direct_create_text_ad`     | Create a text ad with title, text, and URL     |
+| `direct_create_image_ad`    | Create an image ad (banner)                    |
+| `direct_create_dynamic_ad`  | Create a dynamic text ad from feed data        |
 | `direct_create_shopping_ad` | Create a shopping ad (unified campaign format) |
-| `direct_update_ad` | Update ad content (triggers re-moderation) |
-| `direct_moderate_ads` | Submit ads for moderation |
-| `direct_suspend_ads` | Pause ads |
-| `direct_resume_ads` | Resume paused ads |
-| `direct_archive_ads` | Archive ads |
-| `direct_unarchive_ads` | Restore archived ads |
-| `direct_delete_ads` | Delete ads permanently |
+| `direct_update_ad`          | Update ad content (triggers re-moderation)     |
+| `direct_moderate_ads`       | Submit ads for moderation                      |
+| `direct_suspend_ads`        | Pause ads                                      |
+| `direct_resume_ads`         | Resume paused ads                              |
+| `direct_archive_ads`        | Archive ads                                    |
+| `direct_unarchive_ads`      | Restore archived ads                           |
+| `direct_delete_ads`         | Delete ads permanently                         |
 
 #### Keywords (8)
 
-| Tool | Description |
-|------|-------------|
-| `direct_get_keywords` | Get keywords with bids and status |
-| `direct_add_keywords` | Add keywords to an ad group |
-| `direct_set_keyword_bids` | Set search and network bids |
-| `direct_suspend_keywords` | Pause keywords |
-| `direct_resume_keywords` | Resume paused keywords |
-| `direct_archive_keywords` | Archive keywords |
-| `direct_unarchive_keywords` | Restore archived keywords |
-| `direct_delete_keywords` | Delete keywords permanently |
+| Tool                        | Description                       |
+| --------------------------- | --------------------------------- |
+| `direct_get_keywords`       | Get keywords with bids and status |
+| `direct_add_keywords`       | Add keywords to an ad group       |
+| `direct_set_keyword_bids`   | Set search and network bids       |
+| `direct_suspend_keywords`   | Pause keywords                    |
+| `direct_resume_keywords`    | Resume paused keywords            |
+| `direct_archive_keywords`   | Archive keywords                  |
+| `direct_unarchive_keywords` | Restore archived keywords         |
+| `direct_delete_keywords`    | Delete keywords permanently       |
 
 #### Statistics (1)
 
-| Tool | Description |
-|------|-------------|
+| Tool                    | Description                                              |
+| ----------------------- | -------------------------------------------------------- |
 | `direct_get_statistics` | Get performance reports (impressions, clicks, cost, CTR) |
 
 #### Bid Modifiers (5)
 
-| Tool | Description |
-|------|-------------|
-| `direct_get_bid_modifiers` | Get bid modifiers (mobile, desktop, demographics, regional, video, retargeting) |
-| `direct_add_bid_modifier` | Add a bid modifier (mobile, desktop, demographics, regional, video, or retargeting) |
-| `direct_set_bid_modifier` | Set bid modifier value (0-1300%) |
-| `direct_delete_bid_modifiers` | Delete bid modifiers |
-| `direct_toggle_bid_modifiers` | Enable or disable bid modifiers |
+| Tool                          | Description                                                                         |
+| ----------------------------- | ----------------------------------------------------------------------------------- |
+| `direct_get_bid_modifiers`    | Get bid modifiers (mobile, desktop, demographics, regional, video, retargeting)     |
+| `direct_add_bid_modifier`     | Add a bid modifier (mobile, desktop, demographics, regional, video, or retargeting) |
+| `direct_set_bid_modifier`     | Set bid modifier value (0-1300%)                                                    |
+| `direct_delete_bid_modifiers` | Delete bid modifiers                                                                |
+| `direct_toggle_bid_modifiers` | Enable or disable bid modifiers                                                     |
 
 #### Retargeting & Audience Targets (9)
 
-| Tool | Description |
-|------|-------------|
-| `direct_get_retargeting_lists` | Get retargeting lists based on Metrika goals |
-| `direct_add_retargeting_list` | Create a retargeting list with goal rules |
-| `direct_update_retargeting_list` | Update retargeting list rules |
-| `direct_delete_retargeting_lists` | Delete retargeting lists |
-| `direct_get_audience_targets` | Get audience targets linking lists to ad groups |
-| `direct_add_audience_target` | Add an audience target to an ad group |
-| `direct_suspend_audience_targets` | Pause audience targets |
-| `direct_resume_audience_targets` | Resume audience targets |
-| `direct_delete_audience_targets` | Delete audience targets |
+| Tool                              | Description                                     |
+| --------------------------------- | ----------------------------------------------- |
+| `direct_get_retargeting_lists`    | Get retargeting lists based on Metrika goals    |
+| `direct_add_retargeting_list`     | Create a retargeting list with goal rules       |
+| `direct_update_retargeting_list`  | Update retargeting list rules                   |
+| `direct_delete_retargeting_lists` | Delete retargeting lists                        |
+| `direct_get_audience_targets`     | Get audience targets linking lists to ad groups |
+| `direct_add_audience_target`      | Add an audience target to an ad group           |
+| `direct_suspend_audience_targets` | Pause audience targets                          |
+| `direct_resume_audience_targets`  | Resume audience targets                         |
+| `direct_delete_audience_targets`  | Delete audience targets                         |
 
 #### Smart Ad Targets (5)
 
-| Tool | Description |
-|------|-------------|
-| `direct_get_smart_ad_targets` | Get smart ad target filters and conditions |
-| `direct_add_smart_ad_target` | Add a targeting filter to a smart ad group |
-| `direct_suspend_smart_ad_targets` | Pause smart ad targets |
-| `direct_resume_smart_ad_targets` | Resume smart ad targets |
-| `direct_delete_smart_ad_targets` | Delete smart ad targets |
+| Tool                              | Description                                |
+| --------------------------------- | ------------------------------------------ |
+| `direct_get_smart_ad_targets`     | Get smart ad target filters and conditions |
+| `direct_add_smart_ad_target`      | Add a targeting filter to a smart ad group |
+| `direct_suspend_smart_ad_targets` | Pause smart ad targets                     |
+| `direct_resume_smart_ad_targets`  | Resume smart ad targets                    |
+| `direct_delete_smart_ad_targets`  | Delete smart ad targets                    |
 
 #### Dynamic Text Ad Targets (6)
 
-| Tool | Description |
-|------|-------------|
-| `direct_get_dynamic_text_ad_targets` | Get dynamic text ad target filters and conditions |
-| `direct_add_dynamic_text_ad_target` | Add an autotargeting filter to a dynamic text ad group |
-| `direct_update_dynamic_text_ad_target` | Update dynamic text ad target settings |
-| `direct_suspend_dynamic_text_ad_targets` | Pause dynamic text ad targets |
-| `direct_resume_dynamic_text_ad_targets` | Resume dynamic text ad targets |
-| `direct_delete_dynamic_text_ad_targets` | Delete dynamic text ad targets |
+| Tool                                     | Description                                            |
+| ---------------------------------------- | ------------------------------------------------------ |
+| `direct_get_dynamic_text_ad_targets`     | Get dynamic text ad target filters and conditions      |
+| `direct_add_dynamic_text_ad_target`      | Add an autotargeting filter to a dynamic text ad group |
+| `direct_update_dynamic_text_ad_target`   | Update dynamic text ad target settings                 |
+| `direct_suspend_dynamic_text_ad_targets` | Pause dynamic text ad targets                          |
+| `direct_resume_dynamic_text_ad_targets`  | Resume dynamic text ad targets                         |
+| `direct_delete_dynamic_text_ad_targets`  | Delete dynamic text ad targets                         |
 
 #### Sitelinks (3)
 
-| Tool | Description |
-|------|-------------|
-| `direct_get_sitelinks` | Get sitelink sets |
-| `direct_add_sitelinks` | Create a sitelink set (up to 8 links) |
-| `direct_delete_sitelinks` | Delete sitelink sets |
+| Tool                      | Description                           |
+| ------------------------- | ------------------------------------- |
+| `direct_get_sitelinks`    | Get sitelink sets                     |
+| `direct_add_sitelinks`    | Create a sitelink set (up to 8 links) |
+| `direct_delete_sitelinks` | Delete sitelink sets                  |
 
 #### VCards (3)
 
-| Tool | Description |
-|------|-------------|
-| `direct_get_vcards` | Get business card info (address, phone, hours) |
-| `direct_add_vcard` | Create a business card for ads |
-| `direct_delete_vcards` | Delete business cards |
+| Tool                   | Description                                    |
+| ---------------------- | ---------------------------------------------- |
+| `direct_get_vcards`    | Get business card info (address, phone, hours) |
+| `direct_add_vcard`     | Create a business card for ads                 |
+| `direct_delete_vcards` | Delete business cards                          |
 
 #### Negative Keyword Sets (4)
 
-| Tool | Description |
-|------|-------------|
-| `direct_get_negative_keyword_shared_sets` | Get shared negative keyword sets |
-| `direct_add_negative_keyword_shared_set` | Create a shared negative keyword set |
-| `direct_update_negative_keyword_shared_set` | Update a negative keyword set |
-| `direct_delete_negative_keyword_shared_sets` | Delete negative keyword sets |
+| Tool                                         | Description                          |
+| -------------------------------------------- | ------------------------------------ |
+| `direct_get_negative_keyword_shared_sets`    | Get shared negative keyword sets     |
+| `direct_add_negative_keyword_shared_set`     | Create a shared negative keyword set |
+| `direct_update_negative_keyword_shared_set`  | Update a negative keyword set        |
+| `direct_delete_negative_keyword_shared_sets` | Delete negative keyword sets         |
 
 #### Ad Extensions (5)
 
-| Tool | Description |
-|------|-------------|
-| `direct_get_adextensions` | Get ad extensions (callouts, etc.) |
-| `direct_add_callouts` | Add callout extensions |
-| `direct_update_adextensions` | Update callout extensions |
-| `direct_delete_adextensions` | Delete ad extensions |
-| `direct_link_callouts_to_ad` | Link callouts to an ad |
+| Tool                         | Description                        |
+| ---------------------------- | ---------------------------------- |
+| `direct_get_adextensions`    | Get ad extensions (callouts, etc.) |
+| `direct_add_callouts`        | Add callout extensions             |
+| `direct_update_adextensions` | Update callout extensions          |
+| `direct_delete_adextensions` | Delete ad extensions               |
+| `direct_link_callouts_to_ad` | Link callouts to an ad             |
 
 #### Videos & Creatives (7)
 
-| Tool | Description |
-|------|-------------|
-| `direct_upload_video` | Upload a video for ad extensions |
-| `direct_get_advideos` | Get uploaded ad videos |
-| `direct_delete_advideos` | Delete ad videos permanently |
-| `direct_create_video_creative` | Create a VIDEO_EXTENSION_CREATIVE from uploaded video |
-| `direct_create_cpc_video_creative` | Create a CPC_VIDEO_CREATIVE (for search campaigns) |
-| `direct_create_cpm_video_creative` | Create a CPM_VIDEO_CREATIVE (for display campaigns) |
-| `direct_get_creatives` | Get video creatives |
+| Tool                               | Description                                           |
+| ---------------------------------- | ----------------------------------------------------- |
+| `direct_upload_video`              | Upload a video for ad extensions                      |
+| `direct_get_advideos`              | Get uploaded ad videos                                |
+| `direct_delete_advideos`           | Delete ad videos permanently                          |
+| `direct_create_video_creative`     | Create a VIDEO_EXTENSION_CREATIVE from uploaded video |
+| `direct_create_cpc_video_creative` | Create a CPC_VIDEO_CREATIVE (for search campaigns)    |
+| `direct_create_cpm_video_creative` | Create a CPM_VIDEO_CREATIVE (for display campaigns)   |
+| `direct_get_creatives`             | Get video creatives                                   |
 
 **Creative Types:**
+
 - `VIDEO_EXTENSION_CREATIVE` — Video extension ads
 - `CPC_VIDEO_CREATIVE` — Video ads for search campaigns
 - `CPM_VIDEO_CREATIVE` — Video ads for display campaigns
 
 #### Feeds (4)
 
-| Tool | Description |
-|------|-------------|
-| `direct_get_feeds` | Get product feeds |
-| `direct_add_feed` | Add a product feed (URL or file) |
-| `direct_update_feed` | Update feed settings |
-| `direct_delete_feeds` | Delete feeds |
+| Tool                  | Description                      |
+| --------------------- | -------------------------------- |
+| `direct_get_feeds`    | Get product feeds                |
+| `direct_add_feed`     | Add a product feed (URL or file) |
+| `direct_update_feed`  | Update feed settings             |
+| `direct_delete_feeds` | Delete feeds                     |
 
 #### Images (4)
 
-| Tool | Description |
-|------|-------------|
-| `direct_upload_image` | Upload a base64-encoded image (JPEG, GIF, PNG) |
-| `direct_get_images` | Get image metadata, hashes, and association status |
-| `direct_update_image` | Update image properties (name) |
-| `direct_delete_images` | Delete unassociated images by hash |
+| Tool                   | Description                                        |
+| ---------------------- | -------------------------------------------------- |
+| `direct_upload_image`  | Upload a base64-encoded image (JPEG, GIF, PNG)     |
+| `direct_get_images`    | Get image metadata, hashes, and association status |
+| `direct_update_image`  | Update image properties (name)                     |
+| `direct_delete_images` | Delete unassociated images by hash                 |
 
 #### Dictionaries & Regions (3)
 
-| Tool | Description |
-|------|-------------|
+| Tool                      | Description                                        |
+| ------------------------- | -------------------------------------------------- |
 | `direct_get_dictionaries` | Get Direct dictionaries (ad categories, interests) |
-| `direct_get_regions` | Get geographic region tree |
-| `direct_get_interests` | Get interest categories for targeting |
+| `direct_get_regions`      | Get geographic region tree                         |
+| `direct_get_interests`    | Get interest categories for targeting              |
 
 #### Client & Changes (4)
 
-| Tool | Description |
-|------|-------------|
-| `direct_get_client_info` | Get account info and settings |
-| `direct_check_campaign_changes` | Check for changes in specific campaigns |
-| `direct_check_all_changes` | Check for any changes in the account |
-| `direct_get_recent_changes_timestamp` | Get timestamp of most recent changes |
+| Tool                                  | Description                             |
+| ------------------------------------- | --------------------------------------- |
+| `direct_get_client_info`              | Get account info and settings           |
+| `direct_check_campaign_changes`       | Check for changes in specific campaigns |
+| `direct_check_all_changes`            | Check for any changes in the account    |
+| `direct_get_recent_changes_timestamp` | Get timestamp of most recent changes    |
 
 #### Lead Forms (5)
 
-| Tool | Description |
-|------|-------------|
-| `direct_get_lead_forms` | Get lead forms with filtering by campaign/ad group |
-| `direct_add_lead_form` | Create a new lead form with custom questions |
-| `direct_update_lead_form` | Update lead form settings |
-| `direct_delete_lead_forms` | Delete lead forms permanently |
-| `direct_get_lead_form_leads` | Get submissions/leads from lead forms |
+| Tool                         | Description                                        |
+| ---------------------------- | -------------------------------------------------- |
+| `direct_get_lead_forms`      | Get lead forms with filtering by campaign/ad group |
+| `direct_add_lead_form`       | Create a new lead form with custom questions       |
+| `direct_update_lead_form`    | Update lead form settings                          |
+| `direct_delete_lead_forms`   | Delete lead forms permanently                      |
+| `direct_get_lead_form_leads` | Get submissions/leads from lead forms              |
 
 #### Agency Clients (2)
 
-| Tool | Description |
-|------|-------------|
-| `direct_get_agency_clients` | Get list of agency client accounts with status and permissions |
-| `direct_update_agency_client` | Update client account settings and notifications |
+| Tool                          | Description                                                    |
+| ----------------------------- | -------------------------------------------------------------- |
+| `direct_get_agency_clients`   | Get list of agency client accounts with status and permissions |
+| `direct_update_agency_client` | Update client account settings and notifications               |
 
 #### TurboPages (5)
 
-| Tool | Description |
-|------|-------------|
-| `direct_get_turbo_pages` | Get list of Turbo pages with status and settings |
-| `direct_add_turbo_page` | Create a new Turbo page from a website URL |
-| `direct_update_turbo_page` | Update Turbo page name and URL |
-| `direct_delete_turbo_pages` | Delete Turbo pages permanently |
-| `direct_get_turbo_page_templates` | Get available Turbo page templates |
+| Tool                              | Description                                      |
+| --------------------------------- | ------------------------------------------------ |
+| `direct_get_turbo_pages`          | Get list of Turbo pages with status and settings |
+| `direct_add_turbo_page`           | Create a new Turbo page from a website URL       |
+| `direct_update_turbo_page`        | Update Turbo page name and URL                   |
+| `direct_delete_turbo_pages`       | Delete Turbo pages permanently                   |
+| `direct_get_turbo_page_templates` | Get available Turbo page templates               |
 
 #### VideoAds (7)
 
-| Tool | Description |
-|------|-------------|
-| `direct_get_video_ad_videos` | Get video ad videos with status and metadata |
-| `direct_add_video_ad_videos` | Add video ad videos from URLs |
-| `direct_get_video_ad_groups` | Get video ad groups with targeting settings |
-| `direct_add_video_ad_groups` | Add video ad groups to campaigns |
-| `direct_update_video_ad_groups` | Update video ad group settings |
-| `direct_get_video_ads` | Get video ads with content and status |
-| `direct_add_video_ads` | Add video ads to video ad groups |
+| Tool                            | Description                                  |
+| ------------------------------- | -------------------------------------------- |
+| `direct_get_video_ad_videos`    | Get video ad videos with status and metadata |
+| `direct_add_video_ad_videos`    | Add video ad videos from URLs                |
+| `direct_get_video_ad_groups`    | Get video ad groups with targeting settings  |
+| `direct_add_video_ad_groups`    | Add video ad groups to campaigns             |
+| `direct_update_video_ad_groups` | Update video ad group settings               |
+| `direct_get_video_ads`          | Get video ads with content and status        |
+| `direct_add_video_ads`          | Add video ads to video ad groups             |
 
 ### Yandex Metrika (43 tools)
 
 #### Counters (5)
 
-| Tool | Description |
-|------|-------------|
-| `metrika_get_counters` | List all Metrika counters |
-| `metrika_get_counter` | Get detailed counter info (code status, webvisor, goals) |
-| `metrika_create_counter` | Create a new counter with tracking code |
-| `metrika_update_counter` | Update counter name, site, or favorite status |
-| `metrika_delete_counter` | Delete a counter and all its data |
+| Tool                     | Description                                              |
+| ------------------------ | -------------------------------------------------------- |
+| `metrika_get_counters`   | List all Metrika counters                                |
+| `metrika_get_counter`    | Get detailed counter info (code status, webvisor, goals) |
+| `metrika_create_counter` | Create a new counter with tracking code                  |
+| `metrika_update_counter` | Update counter name, site, or favorite status            |
+| `metrika_delete_counter` | Delete a counter and all its data                        |
 
 #### Goals (4)
 
-| Tool | Description |
-|------|-------------|
-| `metrika_get_goals` | Get conversion goals for a counter |
+| Tool                  | Description                                 |
+| --------------------- | ------------------------------------------- |
+| `metrika_get_goals`   | Get conversion goals for a counter          |
 | `metrika_create_goal` | Create a goal (URL, event, composite, etc.) |
-| `metrika_update_goal` | Update goal conditions |
-| `metrika_delete_goal` | Delete a goal |
+| `metrika_update_goal` | Update goal conditions                      |
+| `metrika_delete_goal` | Delete a goal                               |
 
 #### Reports (4)
 
-| Tool | Description |
-|------|-------------|
-| `metrika_get_report` | Get analytics report with custom metrics and dimensions |
-| `metrika_get_report_by_time` | Get time-series report (daily, weekly, monthly) |
-| `metrika_get_comparison_report` | Compare two date ranges |
-| `metrika_get_drilldown_report` | Get hierarchical drill-down report |
+| Tool                            | Description                                             |
+| ------------------------------- | ------------------------------------------------------- |
+| `metrika_get_report`            | Get analytics report with custom metrics and dimensions |
+| `metrika_get_report_by_time`    | Get time-series report (daily, weekly, monthly)         |
+| `metrika_get_comparison_report` | Compare two date ranges                                 |
+| `metrika_get_drilldown_report`  | Get hierarchical drill-down report                      |
 
 #### Segments (4)
 
-| Tool | Description |
-|------|-------------|
-| `metrika_get_segments` | Get audience segments |
+| Tool                     | Description                             |
+| ------------------------ | --------------------------------------- |
+| `metrika_get_segments`   | Get audience segments                   |
 | `metrika_create_segment` | Create a segment with filter expression |
-| `metrika_update_segment` | Update segment definition |
-| `metrika_delete_segment` | Delete a segment |
+| `metrika_update_segment` | Update segment definition               |
+| `metrika_delete_segment` | Delete a segment                        |
 
 #### Filters (4)
 
-| Tool | Description |
-|------|-------------|
-| `metrika_get_filters` | Get data filters for a counter |
+| Tool                    | Description                               |
+| ----------------------- | ----------------------------------------- |
+| `metrika_get_filters`   | Get data filters for a counter            |
 | `metrika_create_filter` | Create a filter (include/exclude traffic) |
-| `metrika_update_filter` | Update filter conditions |
-| `metrika_delete_filter` | Delete a filter |
+| `metrika_update_filter` | Update filter conditions                  |
+| `metrika_delete_filter` | Delete a filter                           |
 
 #### Grants (4)
 
-| Tool | Description |
-|------|-------------|
-| `metrika_get_grants` | Get access permissions for a counter |
-| `metrika_add_grant` | Grant access to another user |
-| `metrika_update_grant` | Update grant permissions |
-| `metrika_delete_grant` | Revoke access |
+| Tool                   | Description                          |
+| ---------------------- | ------------------------------------ |
+| `metrika_get_grants`   | Get access permissions for a counter |
+| `metrika_add_grant`    | Grant access to another user         |
+| `metrika_update_grant` | Update grant permissions             |
+| `metrika_delete_grant` | Revoke access                        |
 
 #### Offline Data (5)
 
-| Tool | Description |
-|------|-------------|
-| `metrika_upload_offline_conversions` | Upload offline conversion data |
-| `metrika_get_offline_conversions_status` | Check upload processing status |
-| `metrika_upload_calls` | Upload call tracking data |
-| `metrika_upload_expenses` | Upload advertising expense data |
-| `metrika_upload_user_parameters` | Upload custom user parameters |
+| Tool                                     | Description                     |
+| ---------------------------------------- | ------------------------------- |
+| `metrika_upload_offline_conversions`     | Upload offline conversion data  |
+| `metrika_get_offline_conversions_status` | Check upload processing status  |
+| `metrika_upload_calls`                   | Upload call tracking data       |
+| `metrika_upload_expenses`                | Upload advertising expense data |
+| `metrika_upload_user_parameters`         | Upload custom user parameters   |
 
 #### Labels (6)
 
-| Tool | Description |
-|------|-------------|
-| `metrika_get_labels` | Get labels for organizing counters |
-| `metrika_create_label` | Create a label |
-| `metrika_update_label` | Rename a label |
-| `metrika_delete_label` | Delete a label |
-| `metrika_link_counter_to_label` | Link a counter to a label |
-| `metrika_unlink_counter_from_label` | Unlink a counter from a label |
+| Tool                                | Description                        |
+| ----------------------------------- | ---------------------------------- |
+| `metrika_get_labels`                | Get labels for organizing counters |
+| `metrika_create_label`              | Create a label                     |
+| `metrika_update_label`              | Rename a label                     |
+| `metrika_delete_label`              | Delete a label                     |
+| `metrika_link_counter_to_label`     | Link a counter to a label          |
+| `metrika_unlink_counter_from_label` | Unlink a counter from a label      |
 
 #### Annotations (4)
 
-| Tool | Description |
-|------|-------------|
-| `metrika_get_annotations` | Get chart annotations for a counter |
+| Tool                        | Description                                  |
+| --------------------------- | -------------------------------------------- |
+| `metrika_get_annotations`   | Get chart annotations for a counter          |
 | `metrika_create_annotation` | Create an annotation (mark events on charts) |
-| `metrika_update_annotation` | Update annotation text |
-| `metrika_delete_annotation` | Delete an annotation |
+| `metrika_update_annotation` | Update annotation text                       |
+| `metrika_delete_annotation` | Delete an annotation                         |
 
 #### Delegates (3)
 
-| Tool | Description |
-|------|-------------|
-| `metrika_get_delegates` | Get list of account delegates |
-| `metrika_add_delegate` | Add a delegate with counter access |
-| `metrika_delete_delegate` | Remove a delegate |
+| Tool                      | Description                        |
+| ------------------------- | ---------------------------------- |
+| `metrika_get_delegates`   | Get list of account delegates      |
+| `metrika_add_delegate`    | Add a delegate with counter access |
+| `metrika_delete_delegate` | Remove a delegate                  |
 
 ### Yandex Wordstat (5 tools)
 
-| Tool | Description |
-|------|-------------|
-| `wordstat_top_requests` | Get popular search queries and associations for phrases |
-| `wordstat_dynamics` | Get query frequency dynamics over time (daily/weekly/monthly) |
-| `wordstat_regions` | Get regional distribution of search queries |
-| `wordstat_regions_tree` | Get full hierarchical regions tree with IDs |
-| `wordstat_user_info` | Get API quota and usage limits |
+| Tool                    | Description                                                   |
+| ----------------------- | ------------------------------------------------------------- |
+| `wordstat_top_requests` | Get popular search queries and associations for phrases       |
+| `wordstat_dynamics`     | Get query frequency dynamics over time (daily/weekly/monthly) |
+| `wordstat_regions`      | Get regional distribution of search queries                   |
+| `wordstat_regions_tree` | Get full hierarchical regions tree with IDs                   |
+| `wordstat_user_info`    | Get API quota and usage limits                                |
 
 ### OAuth Authentication (7 tools)
 
-| Tool | Description |
-|------|-------------|
+| Tool                          | Description                                    |
+| ----------------------------- | ---------------------------------------------- |
 | `oauth_get_authorization_url` | Get authorization URL for web-based OAuth flow |
-| `oauth_exchange_code` | Exchange authorization code for access token |
-| `oauth_get_device_code` | Get device code for headless authentication |
-| `oauth_poll_device_token` | Poll for device token (for headless devices) |
-| `oauth_check_token_status` | Check token status and expiration |
-| `oauth_refresh_token` | Manually refresh expired token |
-| `oauth_revoke_token` | Remove stored token and revoke access |
+| `oauth_exchange_code`         | Exchange authorization code for access token   |
+| `oauth_get_device_code`       | Get device code for headless authentication    |
+| `oauth_poll_device_token`     | Poll for device token (for headless devices)   |
+| `oauth_check_token_status`    | Check token status and expiration              |
+| `oauth_refresh_token`         | Manually refresh expired token                 |
+| `oauth_revoke_token`          | Remove stored token and revoke access          |
 
 ## Usage Examples
 
 ### Campaign management
+
 ```
 Show all active campaigns
 Pause campaign "Summer sale"
@@ -570,6 +717,7 @@ Set weekly budget of campaign 123 to 50000 rubles
 ```
 
 ### Keywords
+
 ```
 Show keywords in ad group 456
 Add keywords "buy iphone" and "iphone price" to group 456
@@ -577,6 +725,7 @@ Set bid 50 rubles on keyword 789
 ```
 
 ### Analytics
+
 ```
 Show site stats for the last week
 How many conversions on goal "Lead" for the last month?
@@ -584,6 +733,7 @@ Show traffic sources for counter 97538360
 ```
 
 ### Ad creation
+
 ```
 Create a text ad in group 456:
 - Title: Buy iPhone 15
@@ -592,6 +742,7 @@ Create a text ad in group 456:
 ```
 
 ### Keyword research
+
 ```
 Show top requests for "buy car from china"
 Query dynamics for "electric car" over the last year
@@ -601,6 +752,7 @@ Regional distribution for "auto from japan"
 ## Alternative Run Methods
 
 ### Direct execution
+
 ```bash
 python -m yandex_mcp
 # or
@@ -608,11 +760,13 @@ python main.py
 ```
 
 ### MCP Inspector
+
 ```bash
 npx @modelcontextprotocol/inspector python -m yandex_mcp
 ```
 
 ### Cursor IDE
+
 Add to Cursor MCP settings in the same format as above.
 
 ## Project Structure
