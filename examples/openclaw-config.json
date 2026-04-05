@@ -1,0 +1,14 @@
+{
+    "mcpServers": {
+        "yandex-direct": {
+            "command": "python",
+            "args": [
+                "-m",
+                "yandex_mcp"
+            ],
+            "env": {
+                "YANDEX_TOKEN": "${YANDEX_TOKEN}"
+            }
+        }
+    }
+}

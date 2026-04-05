@@ -1,0 +1,16 @@
+{
+    "mcpServers": {
+        "yandex-direct": {
+            "command": "python",
+            "args": [
+                "-m",
+                "yandex_mcp"
+            ],
+            "env": {
+                "YANDEX_CLIENT_ID": "${YANDEX_CLIENT_ID}",
+                "YANDEX_CLIENT_SECRET": "${YANDEX_CLIENT_SECRET}",
+                "YANDEX_CLIENT_LOGIN": "${YANDEX_CLIENT_LOGIN}"
+            }
+        }
+    }
+}

@@ -5,6 +5,12 @@ This server provides tools for managing advertising campaigns in Yandex Direct
 and analyzing website statistics in Yandex Metrika through the Model Context Protocol.
 """
 
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 from mcp.server.fastmcp import FastMCP
 
 from .tools import register_all_tools
