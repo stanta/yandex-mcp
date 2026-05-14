@@ -33,43 +33,55 @@ class YandexAPIClient:
         return get_server_auth_config()
 
     def _get_direct_token(self) -> str:
-        """Get token for Direct API, trying OAuth first, then static."""
+        """Get token for Direct API, preferring static tokens before OAuth."""
         request_token = get_request_auth_token()
         if request_token:
             return request_token
 
         auth_config = self._get_auth_config()
+        static_token = auth_config.direct_token or auth_config.unified_token
+        if static_token:
+            return static_token
+
         if auth_config.has_oauth_credentials:
             token = self._get_oauth_token("direct")
             if token:
                 return token
-        return auth_config.direct_token or auth_config.unified_token
+        return ""
 
     def _get_metrika_token(self) -> str:
-        """Get token for Metrika API, trying OAuth first, then static."""
+        """Get token for Metrika API, preferring static tokens before OAuth."""
         request_token = get_request_auth_token()
         if request_token:
             return request_token
 
         auth_config = self._get_auth_config()
+        static_token = auth_config.metrika_token or auth_config.unified_token
+        if static_token:
+            return static_token
+
         if auth_config.has_oauth_credentials:
             token = self._get_oauth_token("metrika")
             if token:
                 return token
-        return auth_config.metrika_token or auth_config.unified_token
+        return ""
 
     def _get_wordstat_token(self) -> str:
-        """Get token for Wordstat API."""
+        """Get token for Wordstat API, preferring static tokens before OAuth."""
         request_token = get_request_auth_token()
         if request_token:
             return request_token
 
         auth_config = self._get_auth_config()
+        static_token = auth_config.direct_token or auth_config.unified_token
+        if static_token:
+            return static_token
+
         if auth_config.has_oauth_credentials:
             token = self._get_oauth_token("direct")  # Wordstat uses Direct credentials
             if token:
                 return token
-        return auth_config.direct_token or auth_config.unified_token
+        return ""
 
     def _get_oauth_token(self, service: str) -> Optional[str]:
         """Get valid OAuth token from storage or refresh if needed."""
