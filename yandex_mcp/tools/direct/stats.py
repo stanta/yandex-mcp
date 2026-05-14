@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import logging
 import httpx
 from mcp.server.fastmcp import FastMCP
 
@@ -10,6 +11,9 @@ from ...config import REPORT_TIMEOUT
 from ...models.common import ResponseFormat
 from ...models.direct import DirectReportInput
 from ...utils import handle_api_error
+
+
+logger = logging.getLogger("yandex_mcp.direct_stats")
 
 
 def register(mcp: FastMCP) -> None:
@@ -45,6 +49,15 @@ def register(mcp: FastMCP) -> None:
         - Date - For daily breakdown
         """
         try:
+            logger.info(
+                "direct_get_statistics params normalized: report_type=%s date_from=%s date_to=%s field_names_count=%s campaign_ids_count=%s",
+                params.report_type,
+                params.date_from,
+                params.date_to,
+                len(params.field_names or []),
+                len(params.campaign_ids or []),
+            )
+
             # Build report definition
             report_def = {
                 "SelectionCriteria": {
@@ -84,14 +97,20 @@ def register(mcp: FastMCP) -> None:
                 "skipReportSummary": "true"
             }
 
-            if api_client.client_login:
-                headers["Client-Login"] = api_client.client_login
+            auth_config = api_client._get_auth_config()
+            if auth_config.client_login:
+                headers["Client-Login"] = auth_config.client_login
 
             max_attempts = 10
             response = None
             async with httpx.AsyncClient(timeout=REPORT_TIMEOUT) as client:
                 for attempt in range(max_attempts):
                     response = await client.post(url, json={"params": report_def}, headers=headers)
+                    logger.info(
+                        "direct_get_statistics report attempt=%s status=%s",
+                        attempt + 1,
+                        response.status_code,
+                    )
 
                     if response.status_code == 200:
                         break

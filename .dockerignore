@@ -1,0 +1,15 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.log
+.pytest_cache
+.mypy_cache
+.ruff_cache
+tests/
+docs/plans/
+Screenshot_20260405_153529.png
+.env

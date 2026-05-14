@@ -3,7 +3,7 @@
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .common import ResponseFormat
 
@@ -117,6 +117,38 @@ class GetCampaignsInput(BaseModel):
         default=ResponseFormat.MARKDOWN,
         description="Output format: 'markdown' or 'json'"
     )
+
+    @model_validator(mode="before")
+    @classmethod
+    def _normalize_legacy_payload(cls, data: Any) -> Any:
+        """Accept legacy Direct API-shaped params from MCP clients.
+
+        Legacy clients may send:
+        - SelectionCriteria.Ids / States / Statuses / Types
+        - Page.Limit / Page.Offset
+        """
+        if not isinstance(data, dict):
+            return data
+
+        normalized = dict(data)
+        selection = normalized.pop("SelectionCriteria", None)
+        page = normalized.pop("Page", None)
+
+        if isinstance(selection, dict):
+            normalized.setdefault("campaign_ids", selection.get("Ids"))
+            normalized.setdefault("states", selection.get("States"))
+            normalized.setdefault("statuses", selection.get("Statuses"))
+            normalized.setdefault("types", selection.get("Types"))
+
+        if isinstance(page, dict):
+            normalized.setdefault("limit", page.get("Limit"))
+            normalized.setdefault("offset", page.get("Offset"))
+
+        if "FieldNames" in normalized and "field_names" not in normalized:
+            # Ignore unsupported legacy field list for this endpoint.
+            normalized.pop("FieldNames", None)
+
+        return normalized
 
 
 class ManageCampaignInput(BaseModel):
@@ -387,6 +419,27 @@ class GetAdGroupsInput(BaseModel):
         description="Output format: 'markdown' or 'json'"
     )
 
+    @model_validator(mode="before")
+    @classmethod
+    def _normalize_legacy_payload(cls, data: Any) -> Any:
+        """Accept legacy Direct API-shaped params from MCP clients."""
+        if not isinstance(data, dict):
+            return data
+
+        normalized = dict(data)
+        selection = normalized.pop("SelectionCriteria", None)
+        page = normalized.pop("Page", None)
+
+        if isinstance(selection, dict):
+            normalized.setdefault("campaign_ids", selection.get("CampaignIds"))
+            normalized.setdefault("adgroup_ids", selection.get("Ids"))
+
+        if isinstance(page, dict):
+            normalized.setdefault("limit", page.get("Limit"))
+            normalized.setdefault("offset", page.get("Offset"))
+
+        return normalized
+
 
 class CreateAdGroupInput(BaseModel):
     """Input for creating an ad group."""
@@ -512,6 +565,38 @@ class GetAdsInput(BaseModel):
         default=ResponseFormat.MARKDOWN,
         description="Output format: 'markdown' or 'json'"
     )
+
+    @model_validator(mode="before")
+    @classmethod
+    def _normalize_legacy_payload(cls, data: Any) -> Any:
+        """Accept legacy Direct API-shaped params from MCP clients."""
+        if data is None:
+            return {}
+        if not isinstance(data, dict):
+            return data
+
+        normalized = dict(data)
+        selection = normalized.pop("SelectionCriteria", None)
+        page = normalized.pop("Page", None)
+
+        if isinstance(selection, dict):
+            normalized.setdefault("campaign_ids", selection.get("CampaignIds"))
+            normalized.setdefault("adgroup_ids", selection.get("AdGroupIds"))
+            normalized.setdefault("ad_ids", selection.get("Ids"))
+            normalized.setdefault("states", selection.get("States"))
+            normalized.setdefault("statuses", selection.get("Statuses"))
+
+        if isinstance(page, dict):
+            normalized.setdefault("limit", page.get("Limit"))
+            normalized.setdefault("offset", page.get("Offset"))
+
+        # Legacy field-name arrays are internal Direct API request details,
+        # not public MCP input contract fields.
+        normalized.pop("FieldNames", None)
+        normalized.pop("TextAdFieldNames", None)
+        normalized.pop("TextImageAdFieldNames", None)
+
+        return normalized
 
 
 class CreateTextAdInput(BaseModel):
@@ -724,6 +809,28 @@ class GetKeywordsInput(BaseModel):
         description="Output format: 'markdown' or 'json'"
     )
 
+    @model_validator(mode="before")
+    @classmethod
+    def _normalize_legacy_payload(cls, data: Any) -> Any:
+        """Accept legacy Direct API-shaped params from MCP clients."""
+        if not isinstance(data, dict):
+            return data
+
+        normalized = dict(data)
+        selection = normalized.pop("SelectionCriteria", None)
+        page = normalized.pop("Page", None)
+
+        if isinstance(selection, dict):
+            normalized.setdefault("campaign_ids", selection.get("CampaignIds"))
+            normalized.setdefault("adgroup_ids", selection.get("AdGroupIds"))
+            normalized.setdefault("keyword_ids", selection.get("Ids"))
+
+        if isinstance(page, dict):
+            normalized.setdefault("limit", page.get("Limit"))
+            normalized.setdefault("offset", page.get("Offset"))
+
+        return normalized
+
 
 class AddKeywordsInput(BaseModel):
     """Input for adding keywords."""
@@ -808,3 +915,70 @@ class DirectReportInput(BaseModel):
         default=ResponseFormat.MARKDOWN,
         description="Output format: 'markdown' or 'json'"
     )
+
+    @model_validator(mode="before")
+    @classmethod
+    def _normalize_legacy_payload(cls, data: Any) -> Any:
+        """Accept legacy reports payload fields from MCP clients."""
+        if not isinstance(data, dict):
+            return data
+
+        normalized = dict(data)
+        selection = normalized.pop("SelectionCriteria", None)
+
+        if isinstance(selection, dict):
+            normalized.setdefault("date_from", selection.get("DateFrom"))
+            normalized.setdefault("date_to", selection.get("DateTo"))
+
+            # Support legacy campaign filter format.
+            filters = selection.get("Filter")
+            if isinstance(filters, list):
+                for item in filters:
+                    if not isinstance(item, dict):
+                        continue
+                    if item.get("Field") == "CampaignId" and item.get("Operator") == "IN":
+                        values = item.get("Values")
+                        if isinstance(values, list):
+                            try:
+                                normalized.setdefault("campaign_ids", [int(v) for v in values])
+                            except (TypeError, ValueError):
+                                pass
+                        break
+
+        legacy_filter = normalized.pop("Filter", None)
+        if isinstance(legacy_filter, dict):
+            campaign_ids = legacy_filter.get("CampaignIds")
+            if isinstance(campaign_ids, list):
+                try:
+                    normalized.setdefault("campaign_ids", [int(v) for v in campaign_ids])
+                except (TypeError, ValueError):
+                    pass
+
+        if "DateFrom" in normalized and "date_from" not in normalized:
+            normalized["date_from"] = normalized.pop("DateFrom")
+
+        if "DateTo" in normalized and "date_to" not in normalized:
+            normalized["date_to"] = normalized.pop("DateTo")
+
+        if "ReportType" in normalized and "report_type" not in normalized:
+            normalized["report_type"] = normalized.pop("ReportType")
+
+        if "ReportName" in normalized:
+            # Not part of public MCP contract; generated server-side.
+            normalized.pop("ReportName", None)
+
+        if "report_name" in normalized:
+            # Not part of public MCP contract; generated server-side.
+            normalized.pop("report_name", None)
+
+        if "OrderBy" in normalized:
+            # Not part of public MCP contract for this tool.
+            normalized.pop("OrderBy", None)
+
+        if "FieldNames" in normalized and "field_names" not in normalized:
+            normalized["field_names"] = normalized.pop("FieldNames")
+
+        if "fields" in normalized and "field_names" not in normalized:
+            normalized["field_names"] = normalized.pop("fields")
+
+        return normalized

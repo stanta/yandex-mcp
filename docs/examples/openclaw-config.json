@@ -1,13 +1,10 @@
 {
     "mcpServers": {
         "yandex-direct": {
-            "command": "python",
-            "args": [
-                "-m",
-                "yandex_mcp"
-            ],
-            "env": {
-                "YANDEX_TOKEN": "${YANDEX_TOKEN}"
+            "url": "http://localhost:9639/mcp",
+            "transport": "http",
+            "headers": {
+                "Authorization": "Bearer ${YANDEX_TOKEN}"
             }
         }
     }

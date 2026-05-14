@@ -75,6 +75,12 @@ class YandexOAuthClient:
         Returns:
             URL to redirect user to for authorization
         """
+        if not self.client_id:
+            raise ValueError(
+                "OAuth client_id not configured. "
+                "Set YANDEX_CLIENT_ID environment variable."
+            )
+
         params = {
             "response_type": "code",
             "client_id": self.client_id,

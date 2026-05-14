@@ -120,6 +120,125 @@ If you prefer a global Python interpreter instead of a project virtualenv:
 > What are the site stats for the last week?
 ```
 
+## Streamable HTTP and Docker
+
+The preferred remote transport is **streamable HTTP**. The server keeps [`stdio`](server.py) as the default for local MCP CLI usage, and exposes HTTP with configurable host, port, and path for container deployments.
+
+Authentication is now enforced inside the MCP server itself:
+
+- [`stdio`](server.py) requires process-level credentials at startup: `YANDEX_TOKEN`, `YANDEX_DIRECT_TOKEN`, `YANDEX_METRIKA_TOKEN`, or OAuth app credentials.
+- `streamable-http` accepts the same process-level credentials, but can also resolve a per-request token from `Authorization: Bearer <YANDEX_TOKEN>` or `X-Yandex-Token`.
+- This means Docker and Compose no longer need to inject `YANDEX_TOKEN` into the container just to make remote HTTP calls work.
+
+### Example `mcp.json` for Bearer authentication
+
+Use this pattern when your MCP client supports HTTP headers in `mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "yandex-direct": {
+      "url": "http://localhost:9639/mcp",
+      "transport": "http",
+      "headers": {
+        "Authorization": "Bearer ${YANDEX_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+This sends the token on each HTTP request and matches the server-side auth handling for streamable HTTP.
+
+### Streamable HTTP from source
+
+```bash
+yandex-mcp --transport streamable-http --host 0.0.0.0 --port 9639 --path /mcp
+```
+
+Environment variable equivalents:
+
+- `YANDEX_MCP_HTTP_HOST` — default `0.0.0.0`
+- `YANDEX_MCP_HTTP_PORT` — default `9639`
+- `YANDEX_MCP_HTTP_PATH` — default `/mcp`
+
+Endpoint:
+
+```text
+http://localhost:9639/mcp
+```
+
+Legacy `--transport sse` is still accepted as a compatibility alias, but it now starts the same streamable HTTP server and should not be preferred in new configs.
+
+### Docker build
+
+```bash
+docker build -t yandex-mcp .
+```
+
+### Docker run
+
+```bash
+docker run --rm -p 9639:9639 \
+  yandex-mcp
+```
+
+The container defaults to:
+
+```bash
+yandex-mcp --transport streamable-http --host 0.0.0.0 --port 9639 --path /mcp
+```
+
+To override the HTTP endpoint inside the container:
+
+```bash
+docker run --rm -p 9639:9639 \
+  -e YANDEX_MCP_HTTP_PORT=9639 \
+  -e YANDEX_MCP_HTTP_PATH=/mcp \
+  yandex-mcp
+```
+
+### Docker Compose
+
+The project includes [`docker-compose.yml`](docker-compose.yml) for a production-style container run with automatic restart.
+
+1. Start the service. No Yandex API token is forwarded by Compose.
+2. Start the service:
+
+```bash
+docker compose up -d --build
+```
+
+3. Check the endpoint:
+
+```text
+http://localhost:9639/mcp
+```
+
+If your remote MCP client supports custom HTTP headers, send the token on each request instead of forwarding it through Docker or Compose:
+
+```json
+{
+  "mcpServers": {
+    "yandex-direct": {
+      "url": "http://localhost:9639/mcp",
+      "transport": "http",
+      "headers": {
+        "Authorization": "Bearer ${YANDEX_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+This mirrors [`docs/examples/openclaw-config.json`](docs/examples/openclaw-config.json) and makes the server-enforced auth requirement explicit for `streamable-http` usage.
+
+To stop the service:
+
+```bash
+docker compose down
+```
+
 ## OpenClaw Integration
 
 The Yandex MCP Server can be integrated with [OpenClaw](https://openclaw.ai/) to manage your Yandex advertising through AI agents on channels like WhatsApp, Telegram, Slack, and others.
@@ -222,14 +341,14 @@ Or use OAuth flow for automatic token refresh:
 }
 ```
 
-### SSE Transport (Remote Deployment)
+### Streamable HTTP Transport (Remote Deployment)
 
-For remote OpenClaw deployments, use SSE transport:
+For remote OpenClaw deployments, use streamable HTTP:
 
 1. Start the server:
 
    ```bash
-   yandex-mcp --transport sse --port 3000
+   yandex-mcp --transport streamable-http --host 0.0.0.0 --port 9639 --path /mcp
    ```
 
 2. Configure OpenClaw:
@@ -237,12 +356,14 @@ For remote OpenClaw deployments, use SSE transport:
    {
      "mcpServers": {
        "yandex-direct": {
-         "url": "http://localhost:3000/sse",
+         "url": "http://localhost:9639/mcp",
          "transport": "http"
        }
      }
    }
    ```
+
+See the ready-to-use example in [`docs/examples/openclaw-config.json`](docs/examples/openclaw-config.json).
 
 ### Verification
 

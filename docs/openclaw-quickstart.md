@@ -200,25 +200,49 @@ Then use OAuth tools:
 - `oauth_exchange_code` — Exchange code for tokens
 - `oauth_check_token_status` — Check token status
 
-### SSE Transport (Remote)
+### Streamable HTTP (Remote)
 
 1. Start the server:
 
    ```bash
-   yandex-mcp --transport sse --port 3000
+   yandex-mcp --transport streamable-http --port 9639 --path /mcp
    ```
 
-2. Configure OpenClaw:
+2. Create `mcp.json` with a Bearer token header:
+
    ```json
    {
      "mcpServers": {
        "yandex-direct": {
-         "url": "http://localhost:3000/sse",
-         "transport": "http"
+         "url": "http://localhost:9639/mcp",
+         "transport": "http",
+         "headers": {
+           "Authorization": "Bearer ${YANDEX_TOKEN}"
+         }
        }
      }
    }
    ```
+
+3. Make sure `YANDEX_TOKEN` is available in the client environment before starting the MCP client.
+
+4. Configure OpenClaw:
+
+   ```json
+   {
+     "mcpServers": {
+       "yandex-direct": {
+         "url": "http://localhost:9639/mcp",
+         "transport": "http",
+         "headers": {
+           "Authorization": "Bearer ${YANDEX_TOKEN}"
+         }
+       }
+     }
+   }
+   ```
+
+5. If you use [`stdio`](server.py), keep passing `YANDEX_TOKEN` or OAuth credentials through the launched server process environment. The HTTP header flow only applies to remote `streamable-http` deployments.
 
 ### Agency Accounts
 

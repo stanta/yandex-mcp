@@ -1,6 +1,5 @@
 """Unified API client for Yandex Direct and Metrika APIs."""
 
-import os
 from typing import Any, Dict, Optional
 
 import httpx
@@ -11,6 +10,8 @@ from .config import (
     YANDEX_DIRECT_API_URL_V501,
     YANDEX_DIRECT_SANDBOX_URL,
     YANDEX_METRIKA_API_URL,
+    get_request_auth_token,
+    get_server_auth_config,
 )
 from .oauth import oauth_client, OAuthToken
 from .token_storage import token_storage
@@ -26,41 +27,61 @@ class YandexAPIClient:
             service: Service to use ('direct', 'metrika', 'wordstat')
         """
         self.service = service
-        # Static tokens from environment (backward compatible)
-        self.direct_token = os.environ.get("YANDEX_DIRECT_TOKEN", "")
-        self.metrika_token = os.environ.get("YANDEX_METRIKA_TOKEN", "")
-        self.unified_token = os.environ.get("YANDEX_TOKEN", "")
-        self.client_login = os.environ.get("YANDEX_CLIENT_LOGIN", "")
-        self.use_sandbox = os.environ.get("YANDEX_USE_SANDBOX", "false").lower() == "true"
-        
-        # Check for OAuth credentials
-        self.client_id = os.environ.get("YANDEX_CLIENT_ID", "")
-        self.client_secret = os.environ.get("YANDEX_CLIENT_SECRET", "")
-        self.use_oauth = bool(self.client_id and self.client_secret)
+
+    def _get_auth_config(self):
+        """Return the current resolved server auth configuration."""
+        return get_server_auth_config()
 
     def _get_direct_token(self) -> str:
-        """Get token for Direct API, trying OAuth first, then static."""
-        if self.use_oauth:
+        """Get token for Direct API, preferring static tokens before OAuth."""
+        request_token = get_request_auth_token()
+        if request_token:
+            return request_token
+
+        auth_config = self._get_auth_config()
+        static_token = auth_config.direct_token or auth_config.unified_token
+        if static_token:
+            return static_token
+
+        if auth_config.has_oauth_credentials:
             token = self._get_oauth_token("direct")
             if token:
                 return token
-        return self.direct_token or self.unified_token
+        return ""
 
     def _get_metrika_token(self) -> str:
-        """Get token for Metrika API, trying OAuth first, then static."""
-        if self.use_oauth:
+        """Get token for Metrika API, preferring static tokens before OAuth."""
+        request_token = get_request_auth_token()
+        if request_token:
+            return request_token
+
+        auth_config = self._get_auth_config()
+        static_token = auth_config.metrika_token or auth_config.unified_token
+        if static_token:
+            return static_token
+
+        if auth_config.has_oauth_credentials:
             token = self._get_oauth_token("metrika")
             if token:
                 return token
-        return self.metrika_token or self.unified_token
+        return ""
 
     def _get_wordstat_token(self) -> str:
-        """Get token for Wordstat API."""
-        if self.use_oauth:
+        """Get token for Wordstat API, preferring static tokens before OAuth."""
+        request_token = get_request_auth_token()
+        if request_token:
+            return request_token
+
+        auth_config = self._get_auth_config()
+        static_token = auth_config.direct_token or auth_config.unified_token
+        if static_token:
+            return static_token
+
+        if auth_config.has_oauth_credentials:
             token = self._get_oauth_token("direct")  # Wordstat uses Direct credentials
             if token:
                 return token
-        return self.direct_token or self.unified_token
+        return ""
 
     def _get_oauth_token(self, service: str) -> Optional[str]:
         """Get valid OAuth token from storage or refresh if needed."""
@@ -84,7 +105,7 @@ class YandexAPIClient:
 
     def _get_direct_url(self, use_v501: bool = False) -> str:
         """Get Direct API URL based on configuration."""
-        if self.use_sandbox:
+        if self._get_auth_config().use_sandbox:
             return YANDEX_DIRECT_SANDBOX_URL
         return YANDEX_DIRECT_API_URL_V501 if use_v501 else YANDEX_DIRECT_API_URL
 
@@ -111,8 +132,9 @@ class YandexAPIClient:
             "Content-Type": "application/json"
         }
 
-        if self.client_login:
-            headers["Client-Login"] = self.client_login
+        client_login = self._get_auth_config().client_login
+        if client_login:
+            headers["Client-Login"] = client_login
 
         payload = {
             "method": method,

@@ -1,8 +1,11 @@
 {
     "mcpServers": {
         "yandex-direct": {
-            "url": "http://localhost:3000/sse",
-            "transport": "http"
+            "url": "http://localhost:9639/mcp",
+            "transport": "http",
+            "headers": {
+                "Authorization": "Bearer ${YANDEX_TOKEN}"
+            }
         }
     }
 }

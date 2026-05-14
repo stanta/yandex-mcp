@@ -1,0 +1,11 @@
+services:
+  yandex-mcp:
+    build:
+      context: .
+    image: yandex-mcp:latest
+    network_mode: host
+    environment:
+      YANDEX_MCP_HTTP_HOST: ${YANDEX_MCP_HTTP_HOST:-0.0.0.0}
+      YANDEX_MCP_HTTP_PORT: ${YANDEX_MCP_HTTP_PORT:-9639}
+      YANDEX_MCP_HTTP_PATH: ${YANDEX_MCP_HTTP_PATH:-/mcp}
+    restart: unless-stopped
