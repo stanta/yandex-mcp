@@ -118,6 +118,125 @@ YANDEX_TOKEN=ваш_oauth_токен
 > Какая статистика по сайту за неделю?
 ```
 
+## Streamable HTTP и Docker
+
+Предпочтительный удалённый транспорт — **streamable HTTP**. Для локального запуска через MCP CLI по умолчанию сохраняется [`stdio`](server.py), а для контейнеров доступны настраиваемые host, port и path.
+
+Аутентификация теперь принудительно обрабатывается внутри самого MCP-сервера:
+
+- [`stdio`](server.py) требует process-level credentials при старте: `YANDEX_TOKEN`, `YANDEX_DIRECT_TOKEN`, `YANDEX_METRIKA_TOKEN` или OAuth credentials приложения.
+- `streamable-http` использует те же process-level credentials, но также может принять токен из `Authorization: Bearer <YANDEX_TOKEN>` или `X-Yandex-Token` на каждый HTTP-запрос.
+- Поэтому Docker и Compose больше не обязаны пробрасывать `YANDEX_TOKEN` в контейнер только ради удалённого HTTP-доступа.
+
+### Пример `mcp.json` для Bearer-аутентификации
+
+Используйте такой вариант, если ваш MCP-клиент умеет передавать HTTP-заголовки в `mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "yandex-direct": {
+      "url": "http://localhost:9639/mcp",
+      "transport": "http",
+      "headers": {
+        "Authorization": "Bearer ${YANDEX_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+Такой вариант отправляет токен в каждом HTTP-запросе и соответствует серверной обработке аутентификации для streamable HTTP.
+
+### Streamable HTTP из исходников
+
+```bash
+yandex-mcp --transport streamable-http --host 0.0.0.0 --port 9639 --path /mcp
+```
+
+Эквиваленты через переменные окружения:
+
+- `YANDEX_MCP_HTTP_HOST` — по умолчанию `0.0.0.0`
+- `YANDEX_MCP_HTTP_PORT` — по умолчанию `9639`
+- `YANDEX_MCP_HTTP_PATH` — по умолчанию `/mcp`
+
+Endpoint:
+
+```text
+http://localhost:9639/mcp
+```
+
+Старый вариант `--transport sse` всё ещё принимается для совместимости, но теперь запускает тот же streamable HTTP сервер и не рекомендуется для новых конфигураций.
+
+### Сборка Docker-образа
+
+```bash
+docker build -t yandex-mcp .
+```
+
+### Запуск Docker-контейнера
+
+```bash
+docker run --rm -p 9639:9639 \
+  yandex-mcp
+```
+
+Контейнер по умолчанию запускает:
+
+```bash
+yandex-mcp --transport streamable-http --host 0.0.0.0 --port 9639 --path /mcp
+```
+
+Чтобы переопределить HTTP endpoint внутри контейнера:
+
+```bash
+docker run --rm -p 9639:9639 \
+  -e YANDEX_MCP_HTTP_PORT=9639 \
+  -e YANDEX_MCP_HTTP_PATH=/mcp \
+  yandex-mcp
+```
+
+### Docker Compose
+
+В проект добавлен [`docker-compose.yml`](docker-compose.yml) для production-style запуска контейнера с автоматическим рестартом.
+
+1. Запустите сервис. Compose больше не пробрасывает Yandex API token в контейнер.
+2. Запустите сервис:
+
+```bash
+docker compose up -d --build
+```
+
+3. Проверьте endpoint:
+
+```text
+http://localhost:9639/mcp
+```
+
+Если ваш удалённый MCP-клиент поддерживает custom HTTP headers, передавайте токен в каждом запросе вместо проброса через Docker или Compose:
+
+```json
+{
+  "mcpServers": {
+    "yandex-direct": {
+      "url": "http://localhost:9639/mcp",
+      "transport": "http",
+      "headers": {
+        "Authorization": "Bearer ${YANDEX_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+Это соответствует примеру в [`docs/examples/openclaw-config.json`](docs/examples/openclaw-config.json) и явно фиксирует требование server-enforced auth для `streamable-http`.
+
+Для остановки сервиса:
+
+```bash
+docker compose down
+```
+
 ## Интеграция с OpenClaw
 
 Yandex MCP Server можно интегрировать с [OpenClaw](https://openclaw.ai/) для управления рекламой Яндекса через AI-агентов в WhatsApp, Telegram, Slack и других каналах.
@@ -220,14 +339,14 @@ pip install -e .
 }
 ```
 
-### SSE-транспорт (Удалённое развёртывание)
+### Streamable HTTP транспорт (Удалённое развёртывание)
 
-Для удалённых развёртываний OpenClaw используйте SSE-транспорт:
+Для удалённых развёртываний OpenClaw используйте streamable HTTP:
 
 1. Запустите сервер:
 
    ```bash
-   yandex-mcp --transport sse --port 3000
+   yandex-mcp --transport streamable-http --host 0.0.0.0 --port 9639 --path /mcp
    ```
 
 2. Настройте OpenClaw:
@@ -235,12 +354,14 @@ pip install -e .
    {
      "mcpServers": {
        "yandex-direct": {
-         "url": "http://localhost:3000/sse",
+         "url": "http://localhost:9639/mcp",
          "transport": "http"
        }
      }
    }
    ```
+
+Готовый пример конфигурации: [`docs/examples/openclaw-config.json`](docs/examples/openclaw-config.json).
 
 ### Проверка
 

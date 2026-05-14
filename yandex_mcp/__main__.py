@@ -1,8 +1,7 @@
 """Module entry point for `python -m yandex_mcp`."""
 
-from . import run
+from .cli import main
 
 
 if __name__ == "__main__":
-    run()
-
+    main()

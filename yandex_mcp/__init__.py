@@ -13,6 +13,7 @@ load_dotenv()
 
 from mcp.server.fastmcp import FastMCP
 
+from .config import validate_stdio_auth_config
 from .tools import register_all_tools
 
 __version__ = "1.1.0"
@@ -26,6 +27,7 @@ register_all_tools(mcp)
 
 def run() -> None:
     """Run the MCP server."""
+    validate_stdio_auth_config()
     mcp.run()
 
 
