@@ -30,7 +30,7 @@ def register(mcp: FastMCP) -> None:
             "openWorldHint": False
         }
     )
-    async def direct_get_client_info(params: GetClientInfoInput) -> str:
+    async def direct_get_client_info(params: GetClientInfoInput = GetClientInfoInput()) -> str:
         """Get information about the current client/account.
 
         Returns account settings, limits, and permissions.

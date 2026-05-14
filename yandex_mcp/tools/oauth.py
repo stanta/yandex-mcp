@@ -1,5 +1,7 @@
 """MCP tools for OAuth flow management."""
 
+import logging
+
 from mcp.server.fastmcp import FastMCP
 
 from ..oauth import oauth_client
@@ -7,6 +9,7 @@ from ..token_storage import token_storage
 
 
 mcp = FastMCP("yandex_oauth")
+logger = logging.getLogger("yandex_mcp.oauth_tools")
 
 
 @mcp.tool()
@@ -24,7 +27,12 @@ async def oauth_get_authorization_url(
     Returns:
         URL to redirect user to for authorization
     """
-    url = oauth_client.get_authorization_url(state=state)
+    try:
+        url = oauth_client.get_authorization_url(state=state)
+    except ValueError as e:
+        logger.warning("oauth_get_authorization_url rejected: %s", e)
+        return str(e)
+
     return f"""Please visit this URL to authorize the application:
 
 {url}
@@ -69,7 +77,12 @@ async def oauth_get_device_code() -> str:
     Returns:
         Instructions with device code and verification URL
     """
-    device_info = await oauth_client.get_device_code()
+    try:
+        device_info = await oauth_client.get_device_code()
+    except ValueError as e:
+        logger.warning("oauth_get_device_code rejected: %s", e)
+        return str(e)
+
     return f"""Please complete the following steps:
 
 1. Visit: {device_info['verification_url']}

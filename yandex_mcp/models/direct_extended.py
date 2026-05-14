@@ -3,7 +3,7 @@
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .common import ResponseFormat
 
@@ -160,6 +160,28 @@ class GetBidModifiersInput(BaseModel):
         description="Output format: 'markdown' or 'json'"
     )
 
+    @model_validator(mode="before")
+    @classmethod
+    def _normalize_legacy_payload(cls, data: Any) -> Any:
+        """Accept legacy Direct API-shaped params from MCP clients."""
+        if not isinstance(data, dict):
+            return data
+
+        normalized = dict(data)
+        selection = normalized.pop("SelectionCriteria", None)
+        page = normalized.pop("Page", None)
+
+        if isinstance(selection, dict):
+            normalized.setdefault("campaign_ids", selection.get("CampaignIds"))
+            normalized.setdefault("adgroup_ids", selection.get("AdGroupIds"))
+            normalized.setdefault("bid_modifier_ids", selection.get("Ids"))
+            normalized.setdefault("types", selection.get("Types"))
+
+        if isinstance(page, dict):
+            normalized.setdefault("limit", page.get("Limit"))
+
+        return normalized
+
 
 class MobileAdjustment(BaseModel):
     """Mobile bid adjustment."""
@@ -261,6 +283,25 @@ class GetRetargetingListsInput(BaseModel):
         description="Output format: 'markdown' or 'json'"
     )
 
+    @model_validator(mode="before")
+    @classmethod
+    def _normalize_legacy_payload(cls, data: Any) -> Any:
+        """Accept legacy Direct API-shaped params from MCP clients."""
+        if not isinstance(data, dict):
+            return data
+
+        normalized = dict(data)
+        selection = normalized.pop("SelectionCriteria", None)
+        page = normalized.pop("Page", None)
+
+        if isinstance(selection, dict):
+            normalized.setdefault("retargeting_list_ids", selection.get("Ids"))
+
+        if isinstance(page, dict):
+            normalized.setdefault("limit", page.get("Limit"))
+
+        return normalized
+
 
 class RetargetingRule(BaseModel):
     """Single retargeting rule."""
@@ -315,6 +356,27 @@ class GetAudienceTargetsInput(BaseModel):
     audience_target_ids: Optional[List[int]] = Field(default=None, description="Filter by IDs")
     limit: int = Field(default=100, ge=1, le=10000)
     response_format: ResponseFormat = Field(default=ResponseFormat.MARKDOWN)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _normalize_legacy_payload(cls, data: Any) -> Any:
+        """Accept legacy Direct API-shaped params from MCP clients."""
+        if not isinstance(data, dict):
+            return data
+
+        normalized = dict(data)
+        selection = normalized.pop("SelectionCriteria", None)
+        page = normalized.pop("Page", None)
+
+        if isinstance(selection, dict):
+            normalized.setdefault("campaign_ids", selection.get("CampaignIds"))
+            normalized.setdefault("adgroup_ids", selection.get("AdGroupIds"))
+            normalized.setdefault("audience_target_ids", selection.get("Ids"))
+
+        if isinstance(page, dict):
+            normalized.setdefault("limit", page.get("Limit"))
+
+        return normalized
 
 
 class AddAudienceTargetInput(BaseModel):
